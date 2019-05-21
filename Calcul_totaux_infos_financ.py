@@ -1,6 +1,7 @@
 # coding: utf8
 import GestionDB
 import wx
+import functools
 
 ID_QUESTION = {
     'SalaireP1': 2,
@@ -106,7 +107,7 @@ def UpdateInfos(infosFamille):
 def UpdateE_(nom_somme, noms_colonnes, infosFamille):
     valeurs_colonnes = tuple(
         val(nom_colonne, infosFamille) for nom_colonne in noms_colonnes)
-    somme_valeurs = reduce(lambda a, b: a + b, valeurs_colonnes)
+    somme_valeurs = functools.reduce(lambda a, b: a + b, valeurs_colonnes)
 
     if somme_valeurs == val(nom_somme, infosFamille):
         return ''
