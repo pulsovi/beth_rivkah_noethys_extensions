@@ -25,7 +25,7 @@ ID_QUESTION = {
 def Extension():
     Request('''
 INSERT INTO `questionnaire_reponses`
-    (`IDreponse`, `IDquestion`, `IDfamille`, `reponse`)
+    (`IDreponse`, `IDquestion`, `IDfamille`, `IDindividu`, `reponse`)
 WITH
 `infos_familles` AS (
     SELECT
@@ -207,6 +207,7 @@ WITH
             `ID_E_RP1` AS `IDreponse`,
             14 AS `IDquestion`,
             `IDfamille`,
+            NULL AS `IDindividu`,
             `SalaireP1` + `ChomageP1` + `CAFP1` + `AutreRevenusP1` AS `reponse`
         FROM `infos_familles`
     UNION
@@ -215,16 +216,19 @@ WITH
             `ID_E_RP2` AS `IDreponse`,
             15 AS `IDquestion`,
             `IDfamille`,
+            NULL AS `IDindividu`,
             `SalaireP2` + `ChomageP2` + `CAFP2` + `AutreRevenusP2` AS `reponse`
         FROM `infos_familles`
     UNION
         -- Somme revenus foyer
         SELECT
             `ID_E_RF` AS `IDreponse`,
-            16 AS `IDquestion`,
-            `IDfamille`,
-            `SalaireP1` + `ChomageP1` + `CAFP1` + `AutreRevenusP1` +
-            `SalaireP2` + `ChomageP2` + `CAFP2` + `AutreRevenusP2` AS `reponse`
+            16        AS `IDquestion`,
+                         `IDfamille`,
+            NULL      AS `IDindividu`,
+                `SalaireP1` + `ChomageP1` + `CAFP1` + `AutreRevenusP1` +
+                `SalaireP2` + `ChomageP2` + `CAFP2` + `AutreRevenusP2`
+                      AS `reponse`
         FROM `infos_familles`
     UNION
         -- Somme charges foyer
@@ -232,14 +236,16 @@ WITH
             `ID_E_Charges` AS `IDreponse`,
             17 AS `IDquestion`,
             `IDfamille`,
+            NULL AS `IDindividu`,
             `Loyer` + `CreditImmo` + `Charges` + `Scolarite` AS `reponse`
         FROM `infos_familles`
     UNION
         -- R.A.V
         SELECT
             `ID_RAV` AS `IDreponse`,
-            18 AS `IDquestion`,
-            `IDfamille`,
+            18       AS `IDquestion`,
+                        `IDfamille`,
+            NULL     AS `IDindividu`,
             -- moyens
             (
                 -- revenus
@@ -257,15 +263,13 @@ WITH
             AS `reponse`
         FROM `infos_familles`
     UNION
-        -- mensualité calculée
+        -- mensualité familiale calculée
         SELECT
-            `ID_mensualit_std` AS `IDreponse`,
-            19 AS `IDquestion`,
-            `infos_familles`.`IDfamille` AS `IDfamille`,
-                SUM(`tarif`)
-                / SUM(IF(ISNULL(`inscriptions`.`IDinscription`),0,1))
-                / `nbMensualites`
-            AS `reponse`
+            `ID_mensualit_std`             AS `IDreponse`,
+            19                             AS `IDquestion`,
+            `infos_familles`.`IDfamille`   AS `IDfamille`,
+            NULL                           AS `IDindividu`,
+            SUM(`tarif`) / `nbMensualites` AS `reponse`
         FROM
             -- IDfamille
             `infos_familles`
@@ -278,8 +282,26 @@ WITH
                     AND `tarifs_scolarites`.`nbEnfantsBR`=`infos_familles`.`nbEnfantsBR`
                     AND `tarifs_scolarites`.`intervenantBR`=`infos_familles`.`intervenantBR`)
         GROUP BY `IDfamille`
+    UNION
+        -- mensualité personnelle calculée
+        SELECT
+            `t_IDreponse`.               `IDreponse`,
+            25                        AS `IDquestion`,
+            NULL                      AS `IDfamille`,
+            `inscriptions`.              `IDindividu`,
+            `tarif` / `nbMensualites` AS `reponse`
+        FROM
+            `inscriptions`
+            LEFT OUTER JOIN `infos_familles` USING(`IDfamille`)
+            LEFT JOIN `tarifs_scolarites`
+                ON (`inscriptions`.`IDgroupe`=`tarifs_scolarites`.`IDgroupe`
+                    AND `tarifs_scolarites`.`nbEnfantsBR`=`infos_familles`.`nbEnfantsBR`
+                    AND `tarifs_scolarites`.`intervenantBR`=`infos_familles`.`intervenantBR`)
+            LEFT OUTER JOIN `questionnaire_reponses` AS `t_IDreponse`
+                ON (`t_IDreponse`.`IDindividu`=`inscriptions`.`IDindividu`
+                    AND `t_IDreponse`.`IDquestion`=25)
 )
-SELECT `IDreponse`, `IDquestion`, `IDfamille`, `reponse`
+SELECT `IDreponse`, `IDquestion`, `IDfamille`, `IDindividu`, `reponse`
     FROM `reponses_to_insert`
     WHERE `reponse` != 0
 ON DUPLICATE KEY UPDATE `reponse`=VALUES(`reponse`);
