@@ -2,26 +2,6 @@
 import GestionDB
 import wx
 
-ID_QUESTION = {
-    'SalaireP1': 2,
-    'ChomageP1': 3,
-    'CAFP1': 4,
-    'AutreRevenusP1': 5,
-    'SalaireP2': 6,
-    'ChomageP2': 7,
-    'CAFP2': 8,
-    'AutreRevenusP2': 9,
-    'Loyer': 10,
-    'CreditImmo': 11,
-    'Charges': 12,
-    'Scolarite': 13,
-    'E_RP1': 14,
-    'E_RP2': 15,
-    'E_RF': 16,
-    'E_Charges': 17
-}
-
-
 def Extension():
     Request('''
 INSERT INTO `questionnaire_reponses`
@@ -300,6 +280,24 @@ WITH
             LEFT OUTER JOIN `questionnaire_reponses` AS `t_IDreponse`
                 ON (`t_IDreponse`.`IDindividu`=`inscriptions`.`IDindividu`
                     AND `t_IDreponse`.`IDquestion`=25)
+    UNION
+        -- Département
+        SELECT
+            `t_IDreponse`.                `IDreponse`,
+            26                         AS `IDquestion`,
+            NULL                       AS `IDfamille`,
+            `individus`.                  `IDindividu`,
+            LEFT(`t_cp`.`cp_resid`, 2) AS `reponse`
+        FROM
+            `individus`
+            LEFT OUTER JOIN `questionnaire_reponses` AS `t_IDreponse` ON (
+                `t_IDreponse`.`IDindividu`=`individus`.`IDindividu`
+                AND `t_IDreponse`.`IDquestion`=26
+            )
+            LEFT OUTER JOIN `individus` AS `t_cp` ON (
+                `t_cp`.`IDindividu`=IFNULL(`individus`.`adresse_auto`, `individus`.`IDindividu`)
+            )
+        WHERE `t_cp`.`cp_resid` IS NOT NULL
 )
 SELECT `IDreponse`, `IDquestion`, `IDfamille`, `IDindividu`, `reponse`
     FROM `reponses_to_insert`
