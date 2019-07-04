@@ -34,7 +34,8 @@ WITH
         + IFNULL(`t_nbParents`.`nbParents`, 0)  AS `psAuFoyer`,
         `t_mensualite_std`.`IDreponse`          AS `ID_mensualit_std`,
         `r_nbMensualites`.`label`               AS `nbMensualites`,
-        IFNULL(`t_intervenantsBR`.`reponse`, 1) AS `intervenantBR`
+        IFNULL(`t_intervenantsBR`.`reponse`, 1) AS `intervenantBR`,
+        IFNULL(`t_mensualite_fix`.`reponse`, 0) AS `montantFix`
     FROM
         `familles`
         LEFT OUTER JOIN (SELECT
@@ -103,6 +104,9 @@ WITH
         LEFT OUTER JOIN `questionnaire_reponses` AS `t_mensualite_std`
             ON (`t_mensualite_std`.`IDfamille`=`familles`.`IDfamille`
                 AND `t_mensualite_std`.`IDquestion`=19)
+        LEFT OUTER JOIN `questionnaire_reponses` AS `t_mensualite_fix`
+                ON (`t_mensualite_fix`.`IDfamille`=`familles`.`IDfamille`
+                    AND `t_mensualite_fix`.`IDquestion`=20)
         LEFT OUTER JOIN `questionnaire_reponses` AS `t_nbEnfants`
             ON (`t_nbEnfants`.`IDfamille`=`familles`.`IDfamille`
                 AND `t_nbEnfants`.`IDquestion`=23)
@@ -298,6 +302,27 @@ WITH
                 `t_cp`.`IDindividu`=IFNULL(`individus`.`adresse_auto`, `individus`.`IDindividu`)
             )
         WHERE `t_cp`.`cp_resid` IS NOT NULL
+    UNION
+        -- Reduction tarif scolarité
+        SELECT
+            `t_IDreponse`.        `IDreponse`,
+            28                 AS `IDquestion`,
+            `infos_familles`.     `IDfamille`,
+            NULL               AS `IDindividu`,
+            100 * (1 - (`infos_familles`.`montantFix` / (SUM(`tarif`) / `nbMensualites`))) AS `reponse`
+        FROM
+            `infos_familles`
+            INNER JOIN `inscriptions` USING(`IDfamille`)
+            LEFT JOIN `tarifs_scolarites` ON (
+                `inscriptions`.`IDgroupe`=`tarifs_scolarites`.`IDgroupe`
+                AND `tarifs_scolarites`.`nbEnfantsBR`=`infos_familles`.`nbEnfantsBR`
+                AND `tarifs_scolarites`.`intervenantBR`=`infos_familles`.`intervenantBR`
+            )
+            LEFT OUTER JOIN `questionnaire_reponses` AS `t_IDreponse` ON (
+                `t_IDreponse`.`IDquestion`=28
+                AND `t_IDreponse`.`IDfamille`=`infos_familles`.`IDfamille`
+            )
+        GROUP BY `IDfamille`
 )
 SELECT `IDreponse`, `IDquestion`, `IDfamille`, `IDindividu`, `reponse`
     FROM `reponses_to_insert`
