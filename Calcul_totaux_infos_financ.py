@@ -369,5 +369,7 @@ ON DUPLICATE KEY UPDATE `reponse`=VALUES(`reponse`);
 
 def Request(Req):
     DB = GestionDB.DB()
-    DB.ExecuterReq(Req.encode('ascii', 'replace'))
-    return DB.ResultatReq()
+    DB.ExecuterReq(Req)
+    res = DB.ResultatReq()
+    DB.Close()
+    return res

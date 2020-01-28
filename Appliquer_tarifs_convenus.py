@@ -4,7 +4,7 @@ import wx
 
 
 def Extension():
-    Request('''
+    Request(u'''
 INSERT INTO `quotients` (
     `IDquotient`,
     `IDfamille`,
@@ -104,4 +104,6 @@ ON DUPLICATE KEY UPDATE `date_fin`=VALUES(`date_fin`);
 def Request(Req):
     DB = GestionDB.DB()
     DB.ExecuterReq(Req)
-    return DB.ResultatReq()
+    res = DB.ResultatReq()
+    DB.Close()
+    return res
