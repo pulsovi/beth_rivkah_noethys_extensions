@@ -60,7 +60,8 @@ INSERT INTO `quotients` (
                 AND `quotients`.`IDquotient`=`infos_familles`.`active_quotient_id`)
         GROUP BY `infos_familles`.`IDfamille`
     )
-    -- fermer les quotients ouverts
+    --
+        -- fermer les quotients ouverts
         SELECT
             `IDquotient`,
             NULL,
@@ -76,6 +77,7 @@ INSERT INTO `quotients` (
             (`quotient`!=`actual_quotient` OR `revenu`!=`actual_revenu`)
             AND `IDquotient` IS NOT NULL
     UNION
+        -- Nouveaux quotients
         SELECT
             NULL,
             `IDfamille`,

@@ -25,14 +25,14 @@ FROM
         WHERE `IDcivilite`!=4 AND `IDcivilite`!=5
     UNION
         SELECT
-            "nombre d'enfants inscrits en Scolartité sur Noethys supérieur au\nnombre d'enfants inscrits à Beth Rivkah renseigné dans le questionnaire famille" AS `Anomalie`,
+            "nombre d'enfants inscrits en Scolartité sur Noethys supérieur au nombre d'enfants inscrits à Beth Rivkah renseigné dans le questionnaire famille" AS `Anomalie`,
             NULL AS `IDindividu`,
             `IDfamille`
         FROM
             (
                 SELECT
                     `familles`.`IDfamille`,
-                    IFNULL(`reponse`, 0) AS `nbEnfantsBR`,
+                    IFNULL(`t_nbEnfantsBR`.`reponse`, 0) AS `nbEnfantsBR`,
                     COUNT(`inscriptions`.`IDgroupe`) AS `nbInscriptions`
                 FROM
                     `familles`
@@ -106,6 +106,14 @@ GROUP BY
     file = open(pathname, 'wb')
     file.write(output.encode('1252'))
     file.close()
+    dlg = wx.MessageDialog(
+        parent=None,
+        message=u"La procédure s'est déroulée avec succès",
+        caption=u"Fin de procédure",
+        style=wx.OK | wx.ICON_INFORMATION
+    )
+    dlg.ShowModal()
+    dlg.Destroy()
 
 
 def OuvrirFicheFamille(IDfamille):
@@ -120,7 +128,6 @@ def OuvrirFicheFamille(IDfamille):
 
 def Request(Req):
     DB = GestionDB.DB()
-    # DB.ExecuterReq(Req.encode('ascii', 'replace'))
     DB.ExecuterReq(Req)
     res = DB.ResultatReq()
     DB.Close()
@@ -128,11 +135,21 @@ def Request(Req):
 
 
 def stringifyErrorList(list):
+    # 0 - Erreur
+    # 1 - IDfamille
+    # 2 - IDindividu
+    # 3 - nom
+    # 4 - prenom
     output = u'Erreur;Référence\n'
+    lastErr = None
     for err in list:
         message = u'"' + err[0] + u'"'
         ref = err[3] + u' ' + err[4]
         if err[2] is None:
+            if lastErr is not None:
+                if lastErr[1] == err[1] and lastErr[0] == err[0]:
+                    continue
+            lastErr = err
             ref = u'"famille ' + ref + u'"'
         output += message + u';' + ref + u'\n'
     return output

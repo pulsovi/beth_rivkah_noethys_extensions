@@ -226,7 +226,7 @@ WITH
                 AND `t_E_Charges`.`IDquestion`=17
             )
     UNION
-        -- R.A.V
+        -- Reste A Vivre
         SELECT
             `t_RAV`.    `IDreponse`,
             18       AS `IDquestion`,
