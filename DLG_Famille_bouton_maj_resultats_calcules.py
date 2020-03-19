@@ -7,9 +7,6 @@ import inspect
 import wx
 
 
-ID_MAJ_CALC = wx.Window.NewControlId()
-
-
 def Extension():
     if inspect.getsource(DLG_Famille.Dialog.OnBoutonOutils) == inspect.getsource(OnBoutonOutils):
         message("Le bouton est en place")
@@ -133,6 +130,7 @@ def OnBoutonOutils(self, event):
 
         menuPop.AppendSeparator()
 
+        ID_MAJ_CALC = wx.Window.NewControlId()
         item = wx.MenuItem(menuPop, ID_MAJ_CALC, _(u"Mettre à jour les résultats calculés"))
         item.SetBitmap(wx.Bitmap(Chemins.GetStaticPath("Images/16x16/Actualiser2.png"), wx.BITMAP_TYPE_PNG))
         menuPop.AppendItem(item)
