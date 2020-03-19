@@ -3,6 +3,7 @@ from Dlg import DLG_Famille
 from Utils import UTILS_Adaptations
 from Utils.UTILS_Traduction import _
 import Chemins
+import inspect
 import wx
 
 
@@ -10,7 +11,7 @@ ID_MAJ_CALC = wx.Window.NewControlId()
 
 
 def Extension():
-    if (DLG_Famille.Dialog.OnBoutonOutils == OnBoutonOutils):
+    if inspect.getsource(DLG_Famille.Dialog.OnBoutonOutils) == inspect.getsource(OnBoutonOutils):
         message("Le bouton est en place")
     else:
         message("Ajout du bouton ...")
