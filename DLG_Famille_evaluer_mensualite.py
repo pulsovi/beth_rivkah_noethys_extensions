@@ -142,26 +142,16 @@ class CTRL(wx.Choice):
 def GetInscriptionsQuery(IDfamille, IDactivite):
     return """
     SELECT
-        `rattachements`.`IDindividu`,
+        `inscriptions`.`IDindividu`,
         `tarifs`.`categories_tarifs`,
         `inscriptions`.`IDcategorie_tarif`,
         `tarifs`.`groupes`,
         `inscriptions`.`IDgroupe`,
-        `questionnaire_filtres`.`criteres`,
-        `questionnaire_reponses`.`reponse`,
         `tarifs_lignes`.`taux`
     FROM
         `inscriptions`
         LEFT JOIN `rattachements` USING(`IDindividu`, `IDfamille`)
         LEFT JOIN `tarifs` USING(`IDactivite`)
-        LEFT JOIN `questionnaire_filtres` USING(`IDtarif`)
-        LEFT JOIN `questionnaire_reponses` ON(
-            `questionnaire_filtres`.`IDquestion`=`questionnaire_reponses`.`IDquestion` AND
-            (
-                `questionnaire_reponses`.`IDfamille`=`rattachements`.`IDfamille` OR
-                `questionnaire_reponses`.`IDindividu`=`rattachements`.`IDindividu`
-            )
-        )
         LEFT JOIN `tarifs_lignes` USING(`IDtarif`, `IDactivite`)
     WHERE
         `rattachements`.`IDfamille`={IDfamille} AND
