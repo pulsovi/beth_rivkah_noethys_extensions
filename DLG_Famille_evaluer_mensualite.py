@@ -32,18 +32,18 @@ def MenuEvaluerMensualite(self, event):
 
     if annee is None:
         return
-    [nb], inscriptions, numberQuery, query = GetInscriptions(self.IDfamille, annee[0])
+    [nb], inscriptions, mensualites = GetInscriptions(self.IDfamille, annee[0])
     nb = nb[0]
     filteredList = filter(filtrerListe, inscriptions)
     valid = validateList(nb, filteredList)
     if not valid:
-        raise Exception(u"""Les donnees d'inscriptions de cette famille semblent anormales.
+        raise Exception(u"""\n\nLes donnees d'inscriptions de cette famille semblent anormales.
 Executez l'utilitaire de detection des anomalies et resolvez-les.
 Si cette erreur persiste apres toutes les corrections, merci de contacter le developpeur de l'extension \
-DLG_Famille_evaluer_mensualite\n""" + str(filteredList) + "\n" + str(nb))
+DLG_Famille_evaluer_mensualite\n""" + str((nb, inscriptions, mensualites, filteredList)))
     famille = 0
     response = u""
-    for individu, prenom, categorie, IDcategorie, groupe, IDgroupe, taux, mensualites in filteredList:
+    for individu, prenom, categorie, IDcategorie, groupe, IDgroupe, taux in filteredList:
         response += u"\n{prenom}: {montant}".format(prenom=prenom, montant=calculateTaux(taux, mensualites))
         famille += calculateTaux(taux, mensualites)
     response = u"famille: {montant}\n".format(montant=famille) + response
@@ -58,7 +58,7 @@ def validateList(nb, list):
     if len(list) != nb:
         return False
     individus = set()
-    for individu, prenom, categorie, IDcategorie, groupe, IDgroupe, taux, mensualites in list:
+    for individu, prenom, categorie, IDcategorie, groupe, IDgroupe, taux in list:
         if individu in individus:
             return False
         individus.add(individu)
@@ -66,7 +66,7 @@ def validateList(nb, list):
 
 
 def filtrerListe(ligne):
-    individu, prenom, categories, IDcategorie, groupes, IDgroupe, taux, mensualites = ligne
+    individu, prenom, categories, IDcategorie, groupes, IDgroupe, taux = ligne
     if str(IDcategorie) not in str(categories).split(";"):
         return False
     if str(IDgroupe) not in str(groupes).split(";"):
@@ -182,27 +182,41 @@ def GetInscriptions(IDfamille, IDactivite):
         `inscriptions`.`IDcategorie_tarif`,
         `tarifs`.`groupes`,
         `inscriptions`.`IDgroupe`,
-        `tarifs_lignes`.`taux`,
-        `questionnaire_choix`.`label`
+        `tarifs_lignes`.`taux`
     FROM
         `inscriptions`
         LEFT JOIN `rattachements` USING(`IDindividu`, `IDfamille`)
         LEFT JOIN `individus` USING(`IDindividu`)
         LEFT JOIN `tarifs` USING(`IDactivite`)
         LEFT JOIN `tarifs_lignes` USING(`IDtarif`, `IDactivite`)
-        LEFT JOIN `questionnaire_reponses` USING(`IDfamille`)
-        LEFT JOIN `questionnaire_choix` ON `reponse` = `IDchoix`
     WHERE
         `rattachements`.`IDfamille`={IDfamille} AND
-        `inscriptions`.`IDactivite`={IDactivite} AND
-        `questionnaire_reponses`.`IDquestion` = 21
+        `inscriptions`.`IDactivite`={IDactivite}
     """.format(IDfamille=IDfamille, IDactivite=IDactivite)
 
     numberQuery = """
     SELECT COUNT(*) FROM `inscriptions` WHERE `IDfamille`={IDfamille} AND `IDactivite`={IDactivite}
     """.format(IDfamille=IDfamille, IDactivite=IDactivite)
 
-    return getQuery(numberQuery), getQuery(inscriptionsQuery), numberQuery, inscriptionsQuery
+    mensualitesQuery = """
+    SELECT
+        `questionnaire_choix`.`label` AS `nb_mensualites`
+    FROM
+        `questionnaire_reponses`
+        LEFT JOIN `questionnaire_choix` ON `reponse`=`IDchoix`
+    WHERE
+        `questionnaire_reponses`.`IDquestion`=21 AND
+        `questionnaire_reponses`.`IDfamille`={IDfamille}
+    """.format(IDfamille=IDfamille)
+    mensualitesResp = getQuery(mensualitesQuery)
+    if len(mensualitesResp) == 0:
+        mensualites = 12
+    elif len(mensualitesResp) == 1:
+        mensualites = mensualitesResp[0][0]
+    else:
+        raise Exception("Nombre de mensualites anormal." + str(mensualitesResp))
+
+    return getQuery(numberQuery), getQuery(inscriptionsQuery), mensualites
 
 
 def getQuery(query):
@@ -210,4 +224,4 @@ def getQuery(query):
     db.ExecuterReq(query)
     response = db.ResultatReq()
     db.Close()
-    return response;
+    return response
