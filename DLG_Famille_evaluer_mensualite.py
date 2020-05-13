@@ -3,7 +3,7 @@
 
 from Ctrl import CTRL_Bouton_image
 from Dlg import DLG_Famille
-from Extensions_automatiques import message
+from Extensions_automatiques import message, addModule, hasModule
 from Utils.UTILS_Traduction import _
 import CTRL_Famille_outils
 import GestionDB
@@ -11,13 +11,17 @@ import wx
 
 
 def Extension():
-    message(u"Extension installée")
+    if not hasModule("DLG_Famille_evaluer_mensualite"):
+        message(u"L'extension est correctement installée, merci de redémarrer Noethys pour l'activer.")
+        return
+    message(u"Extension installée et activée.")
 
 
 def Initialisation():
     DLG_Famille.Dialog.MenuEvaluerMensualite = MenuEvaluerMensualite
     CTRL_Famille_outils.Ajouter("bethrivkah", (u"Évaluer mensualité standard",
         "Images/16x16/Euro.png", "self.MenuEvaluerMensualite"))
+    addModule("DLG_Famille_evaluer_mensualite")
 
 
 def MenuEvaluerMensualite(self, event):
