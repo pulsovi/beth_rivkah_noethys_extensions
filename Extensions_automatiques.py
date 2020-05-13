@@ -5,6 +5,7 @@ import os
 import shutil
 import wx
 from Utils import UTILS_Fichiers
+import Data
 
 customUtilInit = """# coding: utf8
 
@@ -29,11 +30,18 @@ for fichier in fichiers:
         initialisation = getattr(module, "Initialisation", None)
         if callable(initialisation):
             module.Initialisation()
-
 """
 
 
 def Extension():
+    if hasModule("Extensions_automatiques"):
+        message(u"Extension installée et activée.")
+        return
+
+    if hasModule(u"Extensions_automatiques installée"):
+        message(u"L'extension est installée. Merci de redémarrer Noethys pour l'activer")
+        return
+
     noezip = os.path.realpath(os.path.join(UTILS_Fichiers.__file__, "..", ".."))
     tempzip = os.path.join(UTILS_Fichiers.GetRepTemp(), "sortie.zip")
     if os.path.isfile(tempzip):
@@ -45,18 +53,19 @@ def Extension():
             buffer = zipIn.read(item.filename)
             zipOut.writestr(item, buffer)
         else:
-            if zipIn.read(item.filename).decode("utf8") == customUtilInit:
-                zipOut.close()
-                zipIn.close()
-                message(u"L'installation est déjà active.")
-                return
             zipOut.writestr("Utils/__init__.py", customUtilInit)
     zipOut.close()
     zipIn.close()
     os.remove(noezip)
     shutil.copy(tempzip, noezip)
     os.remove(tempzip)
-    message(u"L'installation s'est correctement déroulée.")
+    addModule(u"Extensions_automatiques installée")
+    message(u"""L'installation s'est correctement déroulée. \
+Il est necessaire de redémarrer Noethys pour l'activer.""")
+
+
+def Initialisation():
+    addModule("Extensions_automatiques")
 
 
 def message(text, title=u"Information"):
@@ -68,3 +77,15 @@ def message(text, title=u"Information"):
     )
     dlg.ShowModal()
     dlg.Destroy()
+
+
+def addModule(moduleName):
+    if not hasattr(Data, "extensionsAutomatiques"):
+        Data.extensionsAutomatiques = []
+    Data.extensionsAutomatiques.append(moduleName)
+
+
+def hasModule(moduleName):
+    if not hasattr(Data, "extensionsAutomatiques"):
+        return False
+    return moduleName in Data.extensionsAutomatiques
