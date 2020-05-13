@@ -8,7 +8,6 @@ from Utils.UTILS_Traduction import _
 import CTRL_Famille_outils
 import GestionDB
 import wx
-from divers import copyToClipboard
 
 
 def Extension():
@@ -26,18 +25,49 @@ def MenuEvaluerMensualite(self, event):
     dlg.ShowModal()
     annee = dlg.GetAnnee()
     dlg.Destroy()
-    message(str(annee))
 
-    req = GetInscriptionsQuery(self.IDfamille, annee[0])
-    copyToClipboard(req)
-    message(req)
+    if annee is None:
+        return
+    [nb], inscriptions, numberQuery, query = GetInscriptions(self.IDfamille, annee[0])
+    nb = nb[0]
+    filteredList = filter(filtrerListe, inscriptions)
+    valid = validateList(nb, filteredList)
+    if not valid:
+        raise Exception(u"""Les donnees d'inscriptions de cette famille semblent anormales.
+Executez l'utilitaire de detection des anomalies et resolvez-les.
+Si cette erreur persiste apres toutes les corrections, merci de contacter le developpeur de l'extension \
+DLG_Famille_evaluer_mensualite\n""" + str(filteredList) + "\n" + str(nb))
+    famille = 0
+    response = u""
+    for individu, prenom, categorie, IDcategorie, groupe, IDgroupe, taux, mensualites in filteredList:
+        response += u"\n{prenom}: {montant}".format(prenom=prenom, montant=calculateTaux(taux, mensualites))
+        famille += calculateTaux(taux, mensualites)
+    response = u"famille: {montant}\n".format(montant=famille) + response
+    message(response)
 
-    db = GestionDB.DB()
-    db.ExecuterReq(req)
-    listeDonnees = db.ResultatReq()
-    db.Close()
-    message(str(listeDonnees))
-    return
+
+def calculateTaux(taux, mensualites):
+    return taux * 1000000 / int(mensualites)
+
+
+def validateList(nb, list):
+    if len(list) != nb:
+        return False
+    individus = set()
+    for individu, prenom, categorie, IDcategorie, groupe, IDgroupe, taux, mensualites in list:
+        if individu in individus:
+            return False
+        individus.add(individu)
+    return True
+
+
+def filtrerListe(ligne):
+    individu, prenom, categories, IDcategorie, groupes, IDgroupe, taux, mensualites = ligne
+    if str(IDcategorie) not in str(categories).split(";"):
+        return False
+    if str(IDgroupe) not in str(groupes).split(";"):
+        return False
+    return True
 
 
 class Dialog(wx.Dialog):
@@ -139,32 +169,41 @@ class CTRL(wx.Choice):
         return self.dictDonnees[index][0]
 
 
-def GetInscriptionsQuery(IDfamille, IDactivite):
-    return """
+def GetInscriptions(IDfamille, IDactivite):
+    inscriptionsQuery = """
     SELECT
         `inscriptions`.`IDindividu`,
+        `individus`.`prenom`,
         `tarifs`.`categories_tarifs`,
         `inscriptions`.`IDcategorie_tarif`,
         `tarifs`.`groupes`,
         `inscriptions`.`IDgroupe`,
-        `tarifs_lignes`.`taux`
+        `tarifs_lignes`.`taux`,
+        `questionnaire_choix`.`label`
     FROM
         `inscriptions`
         LEFT JOIN `rattachements` USING(`IDindividu`, `IDfamille`)
+        LEFT JOIN `individus` USING(`IDindividu`)
         LEFT JOIN `tarifs` USING(`IDactivite`)
         LEFT JOIN `tarifs_lignes` USING(`IDtarif`, `IDactivite`)
+        LEFT JOIN `questionnaire_reponses` USING(`IDfamille`)
+        LEFT JOIN `questionnaire_choix` ON `reponse` = `IDchoix`
     WHERE
         `rattachements`.`IDfamille`={IDfamille} AND
-        `inscriptions`.`IDactivite`={IDactivite}
+        `inscriptions`.`IDactivite`={IDactivite} AND
+        `questionnaire_reponses`.`IDquestion` = 21
     """.format(IDfamille=IDfamille, IDactivite=IDactivite)
 
+    numberQuery = """
+    SELECT COUNT(*) FROM `inscriptions` WHERE `IDfamille`={IDfamille} AND `IDactivite`={IDactivite}
+    """.format(IDfamille=IDfamille, IDactivite=IDactivite)
 
-def GetTarifsQuery(IDactivite):
-    return """
-    SELECT
-        *
-    FROM
-        `tarifs`
-    WHERE
-        `IDactivite`={IDactivite}
-    """.format(IDactivite=IDactivite)
+    return getQuery(numberQuery), getQuery(inscriptionsQuery), numberQuery, inscriptionsQuery
+
+
+def getQuery(query):
+    db = GestionDB.DB()
+    db.ExecuterReq(query)
+    response = db.ResultatReq()
+    db.Close()
+    return response;
