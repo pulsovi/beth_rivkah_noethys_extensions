@@ -10,6 +10,22 @@ import GestionDB
 import wx
 
 
+QID = {
+    "enfantsInscritsBR": 24,
+    "intervenantsBR": 1,
+    "mensualites": 21,
+}
+
+CoeffIntervenantBR = {
+    "Non intervenants": 1,
+    "1 parent intervenant ": 0.90,  # 1 parent intervenant à mi-temps
+    "2 parents intervenant": 0.85,  # 2 parents intervenants à mi-temps
+    "1 parent ou plus inte": 0.75,  # 1 parent ou plus intervenants à plein temps
+}
+
+CoeffDegressif = [1, 1, 0.92, 0.88, 0.84, 0.80, 0.76]
+
+
 def Extension():
     if not hasModule("DLG_Famille_evaluer_mensualite"):
         message(u"L'extension est correctement installée, merci de redémarrer Noethys pour l'activer.")
@@ -32,8 +48,7 @@ def MenuEvaluerMensualite(self, event):
 
     if annee is None:
         return
-    [nb], inscriptions, mensualites = GetInscriptions(self.IDfamille, annee[0])
-    nb = nb[0]
+    nb, inscriptions, mensualites, coeff = GetInscriptions(self.IDfamille, annee[0])
     filteredList = filter(filtrerListe, inscriptions)
     valid = validateList(nb, filteredList)
     if not valid:
@@ -44,14 +59,17 @@ DLG_Famille_evaluer_mensualite\n""" + str((nb, inscriptions, mensualites, filter
     famille = 0
     response = u""
     for individu, prenom, categorie, IDcategorie, groupe, IDgroupe, taux in filteredList:
-        response += u"\n{prenom}: {montant}".format(prenom=prenom, montant=calculateTaux(taux, mensualites))
-        famille += calculateTaux(taux, mensualites)
+        response += u"\n{prenom}: {montant}".format(
+            prenom=prenom,
+            montant=calculateTaux(taux, mensualites, coeff)
+        )
+        famille += calculateTaux(taux, mensualites, coeff)
     response = u"famille: {montant}\n".format(montant=famille) + response
     message(response)
 
 
-def calculateTaux(taux, mensualites):
-    return taux * 1000000 / int(mensualites)
+def calculateTaux(taux, mensualites, coeff):
+    return taux * 1000000 / int(mensualites) * coeff
 
 
 def validateList(nb, list):
@@ -197,26 +215,62 @@ def GetInscriptions(IDfamille, IDactivite):
     numberQuery = """
     SELECT COUNT(*) FROM `inscriptions` WHERE `IDfamille`={IDfamille} AND `IDactivite`={IDactivite}
     """.format(IDfamille=IDfamille, IDactivite=IDactivite)
+    numberResponse = getQuery(numberQuery)[0][0]
 
-    mensualitesQuery = """
+    reponsesQuestionnaire = getQuestionnaireValeurs(IDfamille)
+
+    mensualites = int(reponsesQuestionnaire[QID["mensualites"]])
+
+    intervenantsBR = reponsesQuestionnaire[QID["intervenantsBR"]][0:21]
+    enfantsInscritsBR = int(reponsesQuestionnaire[QID["enfantsInscritsBR"]])
+    if enfantsInscritsBR > 6:
+        enfantsInscritsBR = 6
+    coeff = 1 * CoeffIntervenantBR[intervenantsBR] * CoeffDegressif[enfantsInscritsBR]
+
+    return numberResponse, getQuery(inscriptionsQuery), mensualites, coeff
+
+
+def getQuestionnaireValeurs(IDfamille):
+    query = """
     SELECT
-        `questionnaire_choix`.`label` AS `nb_mensualites`
+        `questionnaire_questions`.`IDquestion` AS `question`,
+        IFNULL(
+            `questionnaire_choix`.`label`, IFNULL(
+                `questionnaire_reponses`.`reponse`, `questionnaire_questions`.`defaut`
+        )) AS `reponse`
     FROM
-        `questionnaire_reponses`
-        LEFT JOIN `questionnaire_choix` ON `reponse`=`IDchoix`
+        `questionnaire_questions`
+        LEFT OUTER JOIN `questionnaire_reponses` ON(
+            `questionnaire_questions`.`IDquestion`=`questionnaire_reponses`.`IDquestion` AND
+            `questionnaire_reponses`.`IDfamille`={IDfamille}
+        )
+        LEFT JOIN `questionnaire_choix` ON (
+            `questionnaire_questions`.`IDquestion`=`questionnaire_choix`.`IDquestion` AND
+            (
+                `questionnaire_reponses`.`reponse`=`questionnaire_choix`.`IDchoix` OR
+                (
+                    `questionnaire_reponses`.`reponse` IS NULL AND
+                    `questionnaire_questions`.`defaut`=`questionnaire_choix`.`IDchoix`
+                )
+            )
+        )
     WHERE
-        `questionnaire_reponses`.`IDquestion`=21 AND
-        `questionnaire_reponses`.`IDfamille`={IDfamille}
+        (
+            `questionnaire_reponses`.`IDfamille`={IDfamille} OR
+            (
+                `questionnaire_reponses`.`IDfamille` IS NULL AND
+                `questionnaire_reponses`.`IDindividu` IS NULL
+            )
+        )
+    ORDER BY `questionnaire_questions`.`IDquestion`
     """.format(IDfamille=IDfamille)
-    mensualitesResp = getQuery(mensualitesQuery)
-    if len(mensualitesResp) == 0:
-        mensualites = 12
-    elif len(mensualitesResp) == 1:
-        mensualites = mensualitesResp[0][0]
-    else:
-        raise Exception("Nombre de mensualites anormal." + str(mensualitesResp))
+    response = getQuery(query)
 
-    return getQuery(numberQuery), getQuery(inscriptionsQuery), mensualites
+    reponses = {}
+    for question, reponse in response:
+        reponses[question] = reponse
+
+    return reponses
 
 
 def getQuery(query):
