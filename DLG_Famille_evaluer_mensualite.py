@@ -3,10 +3,9 @@
 
 from Ctrl import CTRL_Bouton_image
 from Dlg import DLG_Famille
-from Extensions_automatiques import message, addModule, hasModule
+from Extensions_automatiques import message, addModule, hasModule, getQuery
 from Utils.UTILS_Traduction import _
 import CTRL_Famille_outils
-import GestionDB
 import wx
 
 
@@ -161,11 +160,8 @@ class CTRL(wx.Choice):
         self.SetItems(listeItems)
 
     def GetListeDonnees(self):
-        db = GestionDB.DB()
         req = """SELECT IDactivite, nom FROM activites ORDER BY nom;"""
-        db.ExecuterReq(req)
-        listeDonnees = db.ResultatReq()
-        db.Close()
+        listeDonnees = getQuery(req)
         self.dictDonnees = {}
         listeNoms = []
         index = 0
@@ -271,11 +267,3 @@ def getQuestionnaireValeurs(IDfamille):
         reponses[question] = reponse
 
     return reponses
-
-
-def getQuery(query):
-    db = GestionDB.DB()
-    db.ExecuterReq(query)
-    response = db.ResultatReq()
-    db.Close()
-    return response

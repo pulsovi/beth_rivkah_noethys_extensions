@@ -6,6 +6,8 @@ import shutil
 import wx
 from Utils import UTILS_Fichiers
 import Data
+import GestionDB
+
 
 customUtilInit = """# coding: utf8
 
@@ -68,6 +70,20 @@ def Initialisation():
     addModule("Extensions_automatiques")
 
 
+def addModule(moduleName):
+    if not hasattr(Data, "extensionsAutomatiques"):
+        Data.extensionsAutomatiques = []
+    Data.extensionsAutomatiques.append(moduleName)
+
+
+def hasModule(moduleName):
+    if not hasattr(Data, "extensionsAutomatiques"):
+        return False
+    return moduleName in Data.extensionsAutomatiques
+
+# fonctions utiles
+
+
 def message(text, title=u"Information"):
     dlg = wx.MessageDialog(
         parent=None,
@@ -79,13 +95,9 @@ def message(text, title=u"Information"):
     dlg.Destroy()
 
 
-def addModule(moduleName):
-    if not hasattr(Data, "extensionsAutomatiques"):
-        Data.extensionsAutomatiques = []
-    Data.extensionsAutomatiques.append(moduleName)
-
-
-def hasModule(moduleName):
-    if not hasattr(Data, "extensionsAutomatiques"):
-        return False
-    return moduleName in Data.extensionsAutomatiques
+def getQuery(query):
+    db = GestionDB.DB()
+    db.ExecuterReq(query)
+    response = db.ResultatReq()
+    db.Close()
+    return response
