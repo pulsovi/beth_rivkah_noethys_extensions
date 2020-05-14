@@ -12,6 +12,8 @@ function watch() {
     case "change":
       handleChange(file);
       break;
+    case "rename":
+      break;
     default:
       beep();
       console.log(`unknown event ${event}, (filename: ${file})`);
