@@ -28,7 +28,7 @@ function handleChange(file) {
     "CTRL_Famille_outils.py",
     "DLG_Famille_evaluer_mensualite.py",
     "Extensions_automatiques.py",
-    "DLG_Famille_bouton_maj_resultats_calcules.py",
+    "DLG_Famille_maj_resultats_calcules.py",
   ];
   const toIgnore = [
     ".git",
