@@ -2,10 +2,10 @@
 from Dlg import DLG_Famille
 from Dlg import DLG_Famille_questionnaire
 from Extensions_automatiques import message, hasModule, addModule, getQuery
-from CTRL_Famille_outils import Ajouter as AjouterOutil
+from CTRL_Famille_outils import Ajouter as AjouterOutil, GetQuestionnaireValeurs
 import wx
 
-VERSION = "1.0"
+VERSION = "_v1.0.2"
 NoethysSauvegardeQuestionnaire = None
 
 
@@ -13,7 +13,7 @@ def Extension():
     if not hasModule(__name__ + VERSION):
         message(u"L'extension est correctement installée, merci de redémarrer Noethys pour l'activer.")
         return
-    message(u"Extension installée et activée.")
+    message(u"Extension installée et activée.", __name__ + VERSION)
 
 
 def Initialisation():
@@ -33,7 +33,6 @@ def MenuMettreAJourLesResultatsCalcules(self, event):
 
 
 def customQuestionnaireSauvegarde(self):
-    message("sauvegarde")
     # mise à jour de la BDD avec les valeurs saisies
     NoethysSauvegardeQuestionnaire(self)
     # mise à jour de la BDD pour les valeurs calculées
@@ -44,136 +43,71 @@ def customQuestionnaireSauvegarde(self):
 
 
 def majResultatsCalcules(IDfamille):
-    getQuery(getQueryString(IDfamille))
+    noms = {
+        2: "SalaireP1", 3: "ChomageP1", 4: "CAFP1", 5: "AutreRevenusP1",
+        6: "SalaireP2", 7: "ChomageP2", 8: "CAFP2", 9: "AutreRevenusP2",
+        10: "Loyer", 11: "CreditImmo", 12: "Charges", 13: "Scolarite",
+        14: "TotalRevenusP1", 15: "TotalRevenusP2", 16: "TotalRevenusFamille", 17: "TotalCharges",
+        23: "NbEnfantsACharge", 18: "ResteAVivre",
+    }
+    reponsesQuestionnaire = {}
+    for IDquestion, valeur in GetQuestionnaireValeurs(IDfamille).iteritems():
+        if IDquestion not in noms:
+            continue
+        valeur["reponse"] = float(valeur["reponse"])
+        reponsesQuestionnaire[noms[IDquestion]] = valeur
 
+    nbParents = int(getQuery("""
+    SELECT IFNULL(SUM(`IDcivilite`!=4 AND `IDcivilite`!=5), 0)
+    FROM
+        `familles`
+        LEFT OUTER JOIN `rattachements` USING(`IDfamille`)
+        LEFT OUTER JOIN `individus` USING(`IDindividu`)
+    WHERE `IDfamille`={IDfamille};
+    """.format(IDfamille=IDfamille))[0][0])
 
-def getQueryString(IDfamille):
-    return """
-        SELECT IFNULL(`reponse`, 0) INTO @SalaireP1
-        FROM `questionnaire_reponses`
-        WHERE
-            `IDquestion`=2 AND
-            `questionnaire_reponses`.`IDfamille`={IDfamille};
+    formatDict = {
+        "IDfamille": IDfamille,
+        "TotalRevenusP1id": reponsesQuestionnaire["TotalRevenusP1"]["IDreponse"],
+        "TotalRevenusP2id": reponsesQuestionnaire["TotalRevenusP2"]["IDreponse"],
+        "TotalChargesID": reponsesQuestionnaire["TotalCharges"]["IDreponse"],
+        "TotalRevenusFamilleID": reponsesQuestionnaire["TotalRevenusFamille"]["IDreponse"],
+        "ResteAVivreID": reponsesQuestionnaire["ResteAVivre"]["IDreponse"],
+        "TotalRevenusP1val": (
+            reponsesQuestionnaire["SalaireP1"]["reponse"]
+            + reponsesQuestionnaire["ChomageP1"]["reponse"]
+            + reponsesQuestionnaire["CAFP1"]["reponse"]
+            + reponsesQuestionnaire["AutreRevenusP1"]["reponse"]
+        ),
+        "TotalRevenusP2val": (
+            reponsesQuestionnaire["SalaireP2"]["reponse"]
+            + reponsesQuestionnaire["ChomageP2"]["reponse"]
+            + reponsesQuestionnaire["CAFP2"]["reponse"]
+            + reponsesQuestionnaire["AutreRevenusP2"]["reponse"]
+        ),
+        "TotalChargesVal": (
+            reponsesQuestionnaire["Loyer"]["reponse"]
+            + reponsesQuestionnaire["CreditImmo"]["reponse"]
+            + reponsesQuestionnaire["Charges"]["reponse"]
+            + reponsesQuestionnaire["Scolarite"]["reponse"]
+        ),
+    }
+    formatDict["TotalRevenusFamilleVal"] = formatDict["TotalRevenusP1val"] + \
+        formatDict["TotalRevenusP2val"]
+    formatDict["ResteAVivreVal"] = (
+        (formatDict["TotalRevenusFamilleVal"] - formatDict["TotalChargesVal"])
+        / (30 * (nbParents + reponsesQuestionnaire["NbEnfantsACharge"]["reponse"]))
+    )
 
-        SELECT IFNULL(`reponse`, 0) INTO @ChomageP1
-        FROM `questionnaire_reponses`
-        WHERE
-            `IDquestion`=3 AND
-            `questionnaire_reponses`.`IDfamille`={IDfamille};
-
-        SELECT IFNULL(`reponse`, 0) INTO @CAFP1
-        FROM `questionnaire_reponses`
-        WHERE
-            `IDquestion`=4 AND
-            `questionnaire_reponses`.`IDfamille`={IDfamille};
-
-        SELECT IFNULL(`reponse`, 0) INTO @AutreRevenusP1
-        FROM `questionnaire_reponses`
-        WHERE
-            `IDquestion`=5 AND
-            `questionnaire_reponses`.`IDfamille`={IDfamille};
-
-        SELECT IFNULL(`reponse`, 0) INTO @SalaireP2
-        FROM `questionnaire_reponses`
-        WHERE
-            `IDquestion`=6 AND
-            `questionnaire_reponses`.`IDfamille`={IDfamille};
-
-        SELECT IFNULL(`reponse`, 0) INTO @ChomageP2
-        FROM `questionnaire_reponses`
-        WHERE
-            `IDquestion`=7 AND
-            `questionnaire_reponses`.`IDfamille`={IDfamille};
-
-        SELECT IFNULL(`reponse`, 0) INTO @CAFP2
-        FROM `questionnaire_reponses`
-        WHERE
-            `IDquestion`=8 AND
-            `questionnaire_reponses`.`IDfamille`={IDfamille};
-
-        SELECT IFNULL(`reponse`, 0) INTO @AutreRevenusP2
-        FROM `questionnaire_reponses`
-        WHERE
-            `IDquestion`=9 AND
-            `questionnaire_reponses`.`IDfamille`={IDfamille};
-
-        SELECT IFNULL(`reponse`, 0) INTO @Loyer
-        FROM `questionnaire_reponses`
-        WHERE
-            `IDquestion`=10 AND
-            `questionnaire_reponses`.`IDfamille`={IDfamille};
-
-        SELECT IFNULL(`reponse`, 0) INTO @CreditImmo
-        FROM `questionnaire_reponses`
-        WHERE
-            `IDquestion`=11 AND
-            `questionnaire_reponses`.`IDfamille`={IDfamille};
-
-        SELECT IFNULL(`reponse`, 0) INTO @Charges
-        FROM `questionnaire_reponses`
-        WHERE
-            `IDquestion`=12 AND
-            `questionnaire_reponses`.`IDfamille`={IDfamille};
-
-        SELECT IFNULL(`reponse`, 0) INTO @Scolarite
-        FROM `questionnaire_reponses`
-        WHERE
-            `IDquestion`=13 AND
-            `questionnaire_reponses`.`IDfamille`={IDfamille};
-
-        SELECT IFNULL(`reponse`, 0) INTO @NbEnfantsACharge
-        FROM `questionnaire_reponses`
-        WHERE
-            `IDquestion`=23 AND
-            `questionnaire_reponses`.`IDfamille`={IDfamille};
-
-        SELECT IFNULL(`IDreponse`, NULL) INTO @TotalRevenusP1
-        FROM `questionnaire_reponses`
-        WHERE
-            `IDquestion`=14 AND
-            `questionnaire_reponses`.`IDfamille`={IDfamille};
-
-        SELECT IFNULL(`IDreponse`, NULL) INTO @TotalRevenusP2
-        FROM `questionnaire_reponses`
-        WHERE
-            `IDquestion`=15 AND
-            `questionnaire_reponses`.`IDfamille`={IDfamille};
-
-        SELECT IFNULL(`IDreponse`, NULL) INTO @TotalRevenusFamille
-        FROM `questionnaire_reponses`
-        WHERE
-            `IDquestion`=16 AND
-            `questionnaire_reponses`.`IDfamille`={IDfamille};
-
-        SELECT IFNULL(`IDreponse`, NULL) INTO @TotalCharges
-        FROM `questionnaire_reponses`
-        WHERE
-            `IDquestion`=17 AND
-            `questionnaire_reponses`.`IDfamille`={IDfamille};
-
-        SELECT IFNULL(`IDreponse`, NULL) INTO @ResteAVivre
-        FROM `questionnaire_reponses`
-        WHERE
-            `IDquestion`=18 AND
-            `questionnaire_reponses`.`IDfamille`={IDfamille};
-
-        SELECT IFNULL(SUM(`IDcivilite`!=4 AND `IDcivilite`!=5), 0) INTO @nbParents
-        FROM
-            `familles`
-            LEFT OUTER JOIN `rattachements` USING(`IDfamille`)
-            LEFT OUTER JOIN `individus` USING(`IDindividu`)
-        WHERE `IDfamille`={IDfamille};
-
-        INSERT INTO `questionnaire_reponses`
-            (`IDreponse`, `IDquestion`, `IDfamille`, `reponse`)
-        VALUES
-            (@TotalRevenusP1, 14, {IDfamille}, @`SalaireP1` + @`ChomageP1` + @`CAFP1` + @`AutreRevenusP1`),
-            (@TotalRevenusP2, 15, {IDfamille}, @`SalaireP2` + @`ChomageP2` + @`CAFP2` + @`AutreRevenusP2`),
-            (@TotalRevenusFamille, 16, {IDfamille}, @`SalaireP1` + @`ChomageP1` + @`CAFP1` + \
-@`AutreRevenusP1` + @`SalaireP2` + @`ChomageP2` + @`CAFP2` + @`AutreRevenusP2`),
-            (@TotalCharges, 17, {IDfamille}, @`Loyer` + @`CreditImmo` + @`Charges` + @`Scolarite`),
-            (@ResteAVivre, 18, {IDfamille}, (@`SalaireP1` + @`ChomageP1` + @`CAFP1` + \
-@`AutreRevenusP1` + @`SalaireP2` + @`ChomageP2` + @`CAFP2` + @`AutreRevenusP2` - @`Loyer` - \
-@`CreditImmo` - @`Charges` - @`Scolarite`) / ((@`nbParents` + @`NbEnfantsACharge`) * 30))
-        ON DUPLICATE KEY UPDATE reponse=VALUES(reponse);
-    """.format(IDfamille=IDfamille)
+    query = """
+    INSERT INTO `questionnaire_reponses`
+        (`IDreponse`, `IDquestion`, `IDfamille`, `reponse`)
+    VALUES
+        ({TotalRevenusP1id}, 14, {IDfamille}, {TotalRevenusP1val}),
+        ({TotalRevenusP2id}, 15, {IDfamille}, {TotalRevenusP2val}),
+        ({TotalRevenusFamilleID}, 16, {IDfamille}, {TotalRevenusFamilleVal}),
+        ({TotalChargesID}, 17, {IDfamille}, {TotalChargesVal}),
+        ({ResteAVivreID}, 18, {IDfamille}, {ResteAVivreVal})
+    ON DUPLICATE KEY UPDATE reponse=VALUES(reponse);
+    """.format(**formatDict)
+    getQuery(query)
