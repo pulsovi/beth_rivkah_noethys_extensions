@@ -25,7 +25,9 @@ FROM
         WHERE `IDcivilite`!=4 AND `IDcivilite`!=5
     UNION
         SELECT
-            "nombre d'enfants inscrits en Scolartité sur Noethys supérieur au nombre d'enfants inscrits à Beth Rivkah renseigné dans le questionnaire famille" AS `Anomalie`,
+            "nombre d'enfants inscrits en Scolartité sur Noethys \
+supérieur au nombre d'enfants inscrits à Beth Rivkah renseigné \
+dans le questionnaire famille" AS `Anomalie`,
             NULL AS `IDindividu`,
             `IDfamille`
         FROM
@@ -94,11 +96,12 @@ GROUP BY
     `IDfamille`,
     `individus`.`IDindividu`
     ''')
-    dlg = wx.FileDialog(None,
-                        message=u"Veuillez sélectionner le répertoire de destination et le nom du fichier",
-                        wildcard=".csv",
-                        defaultFile="anomalies.csv",
-                        )
+    dlg = wx.FileDialog(
+        None,
+        message=u"Veuillez sélectionner le répertoire de destination et le nom du fichier",
+        wildcard=".csv",
+        defaultFile="anomalies.csv",
+    )
     if dlg.ShowModal() == wx.ID_CANCEL:
         return
     pathname = dlg.GetPath()
@@ -135,21 +138,22 @@ def Request(Req):
 
 
 def stringifyErrorList(list):
-    # 0 - Erreur
-    # 1 - IDfamille
-    # 2 - IDindividu
-    # 3 - nom
-    # 4 - prenom
     output = u'Erreur;Référence\n'
-    lastErr = None
-    for err in list:
-        message = u'"' + err[0] + u'"'
-        ref = err[3] + u' ' + err[4]
-        if err[2] is None:
-            if lastErr is not None:
-                if lastErr[1] == err[1] and lastErr[0] == err[0]:
-                    continue
-            lastErr = err
+    lastErr = (None, None)
+    for erreur, IDfamille, IDindividu, nom, prenom in list:
+        message = u'"' + erreur + u'"'
+        ref = nom + u' ' + prenom
+        if IDindividu is None:
+            if lastErr[1] == IDfamille and lastErr[0] == erreur:
+                continue
+            lastErr = (erreur, IDfamille)
             ref = u'"famille ' + ref + u'"'
-        output += message + u';' + ref + u'\n'
+        output += (
+            message
+            + u';'
+            + ref
+            + u';'
+            + str(IDindividu if IDfamille is None else IDfamille)
+            + u'\n'
+        )
     return output
