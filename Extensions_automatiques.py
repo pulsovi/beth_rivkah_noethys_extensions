@@ -8,6 +8,7 @@ from Utils import UTILS_Fichiers
 import Data
 import GestionDB
 
+VERSION = "_v1.0.4"
 
 customUtilInit = """# coding: utf8
 
@@ -15,8 +16,9 @@ import sys
 import os
 import UTILS_Fichiers
 import importlib
+import Data
 
-#sys.stderr.write("\\n\\n\\nLancement des extensions ...\\n\\n\\n")
+Data.extensionsAutomatiques = ["{idString}"]
 
 sys.path.append(UTILS_Fichiers.GetRepExtensions())
 
@@ -32,15 +34,15 @@ for fichier in fichiers:
         initialisation = getattr(module, "Initialisation", None)
         if callable(initialisation):
             module.Initialisation()
-"""
+""".format(idString=__name__ + VERSION)
 
 
 def Extension():
-    if hasModule("Extensions_automatiques"):
+    if hasModule(__name__ + VERSION):
         message(u"Extension installée et activée.")
         return
 
-    if hasModule(u"Extensions_automatiques installée"):
+    if hasModule(__name__ + VERSION + u" installée"):
         message(u"L'extension est installée. Merci de redémarrer Noethys pour l'activer")
         return
 
@@ -61,13 +63,9 @@ def Extension():
     os.remove(noezip)
     shutil.copy(tempzip, noezip)
     os.remove(tempzip)
-    addModule(u"Extensions_automatiques installée")
+    addModule(__name__ + VERSION + u" installée")
     message(u"""L'installation s'est correctement déroulée. \
 Il est necessaire de redémarrer Noethys pour l'activer.""")
-
-
-def Initialisation():
-    addModule("Extensions_automatiques")
 
 
 def addModule(moduleName):
