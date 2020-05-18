@@ -17,6 +17,7 @@ import os
 import UTILS_Fichiers
 import importlib
 import Data
+import wx
 
 Data.extensionsAutomatiques = ["{idString}"]
 
@@ -26,14 +27,36 @@ ext = "py"
 fichiers = os.listdir(UTILS_Fichiers.GetRepExtensions())
 fichiers.sort()
 listeExtensions = []
+fichiersErreurs = []
 for fichier in fichiers:
     if fichier.endswith(ext):
         nomFichier = os.path.split(fichier)[1]
         titre = nomFichier[:-(len(ext) + 1)]
-        module = importlib.import_module(titre)
-        initialisation = getattr(module, "Initialisation", None)
-        if callable(initialisation):
-            module.Initialisation()
+        try:
+            module = importlib.import_module(titre)
+            initialisation = getattr(module, "Initialisation", None)
+            if callable(initialisation):
+                module.Initialisation()
+        except Exception as erreur:
+            fichiersErreurs.append((titre, str(erreur)))
+if len(fichiersErreurs) > 0:
+    app = wx.App(redirect=False)
+    for titre, erreur in fichiersErreurs:
+        dlg = wx.MessageDialog(
+            parent=None,
+            message="\\n".join([
+                u"L'extension suivante n'a pas pu être chargée:",
+                titre,
+                "",
+                "Erreur:",
+                erreur
+            ]),
+            caption="Erreur",
+            style=wx.OK | wx.ICON_ERROR
+        )
+        dlg.ShowModal()
+        dlg.Destroy()
+    app.Destroy()
 """.format(idString=__name__ + VERSION)
 
 
