@@ -62,11 +62,11 @@ if len(fichiersErreurs) > 0:
 
 def Extension():
     if hasModule(__name__ + VERSION):
-        message(u"Extension installée et activée.")
+        message(u"Extension installée et activée.", __name__ + VERSION)
         return
 
     if hasModule(__name__ + VERSION + u" installée"):
-        message(u"L'extension est installée. Merci de redémarrer Noethys pour l'activer")
+        message(u"L'extension est installée. Merci de redémarrer Noethys pour l'activer", __name__ + VERSION)
         return
 
     noezip = os.path.realpath(os.path.join(UTILS_Fichiers.__file__, "..", ".."))
@@ -88,7 +88,7 @@ def Extension():
     os.remove(tempzip)
     addModule(__name__ + VERSION + u" installée")
     message(u"""L'installation s'est correctement déroulée. \
-Il est necessaire de redémarrer Noethys pour l'activer.""")
+Il est necessaire de redémarrer Noethys pour l'activer.""", __name__ + VERSION)
 
 
 def addModule(moduleName):

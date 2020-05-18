@@ -36,6 +36,7 @@ function handleChange(file) {
     "Calcul_totaux_infos_financ.py",
     "Debug_extensions.py",
     "Exporter_anomalies.py",
+    "anomalies.sql",
     "divers.py",
   ];
   if (file === "watch.js") {
