@@ -3,7 +3,9 @@ const fs = require('fs');
 const path = require('path');
 const destinationFolder = "C:\\Users\\DHG\\AppData\\Roaming\\noethys\\Extensions";
 const { fork, exec } = require('child_process');
-const toSend = [];
+const timeouts = [];
+const child_process = require("child_process");
+const Registry = require("winreg");
 
 function watch() {
   console.log("start child");
@@ -38,6 +40,8 @@ function handleChange(file) {
     "Exporter_anomalies.py",
     "anomalies.sql",
     "divers.py",
+    "inscription nouvelle annee.sql",
+    "reset extensions auto.sh",
   ];
   if (file === "watch.js") {
     console.log("exit child");
@@ -46,23 +50,49 @@ function handleChange(file) {
   }
   if (toSend.includes(file)) return send(file);
   if (toIgnore.includes(file)) return;
+  if (file === "NoethysLogIn.ahk") return restartAHK();
   beep();
   console.log(`Wath to do on change file: ${file} ?`);
 }
 
-function send(file) {
-  const to = toSend.find(f => f.file === file)
-  if (to) {
-    clearTimeout(to.to);
-    to.to = setTimeout(() => performSend(file), 200);
+function restartAHK() {
+  const timeout = timeouts.find(to => to.action === "restartAHK")
+  if (timeout) {
+    clearTimeout(timeout.timeout);
+    timeout.timeout = setTimeout(() => performRestartAHK(), 200);
     return;
   }
-  toSend.push({ file, to: setTimeout(() => performSend(file), 200) });
+  timeouts.push({ action: "restartAHK", timeout: setTimeout(() => performRestartAHK(), 200) });
+}
+
+async function performRestartAHK() {
+  const ahkPath = path.join(__dirname, "NoethysLogIn.ahk");
+  const ahkExePath = await new Promise((resolve, reject) => {
+    const regKey = new Registry({hive: Registry.HKLM, key: "\\SOFTWARE\\AutoHotkey"});
+    regKey.values((err, items) => {
+      if (err) return reject(err);
+      const item = items.find(itm => itm.name === "InstallDir");
+      resolve(path.join(item.value, "AutoHotkeyU64.exe"));
+    })
+  });
+  child_process.exec(`"${ahkExePath}" "${ahkPath}"`, err => {
+    if (err) console.log("AHK reload error:\n", err);
+  });
+}
+
+function send(file) {
+  const timeout = timeouts.find(to => to.action === "send" && to.file === file)
+  if (timeout) {
+    clearTimeout(timeout.timeout);
+    timeout.timeout = setTimeout(() => performSend(file), 200);
+    return;
+  }
+  timeouts.push({ action: "send", file, timeout: setTimeout(() => performSend(file), 200) });
 }
 
 function performSend(file) {
-  const index = toSend.findIndex(f => f.file === file);
-  toSend.splice(index, 1);
+  const index = timeouts.findIndex(f => f.file === file);
+  timeouts.splice(index, 1);
   fs.copyFile(
     path.join(__dirname, file),
     path.join(destinationFolder, file),
@@ -73,7 +103,8 @@ function performSend(file) {
   )
 }
 
-function runWatch() {
+async function runWatch() {
+  await sleep(1000);
   fork(__filename).once('exit', runWatch);
 }
 
@@ -88,7 +119,6 @@ function sleep(delay) {
 }
 
 function waitForProcess(childProcess) {
-  //console.log('childProcess:', childProcess.spawnargs.join(" "));
   return new Promise(resolve => childProcess.once('exit', (...args) => resolve(...args)));
 }
 
