@@ -29,8 +29,9 @@ function handleChange(file) {
   const toSend = [
     "CTRL_Famille_outils.py",
     "DLG_Famille_evaluer_mensualite.py",
-    "Extensions_automatiques.py",
+    "DLG_Famille_fixer_tarif.py",
     "DLG_Famille_maj_resultats_calcules.py",
+    "Extensions_automatiques.py",
   ];
   const toIgnore = [
     ".git",
