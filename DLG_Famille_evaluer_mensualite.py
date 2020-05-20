@@ -1,12 +1,14 @@
 # coding: utf8
 
-
 from Ctrl import CTRL_Bouton_image
 from Dlg import DLG_Famille
-from Extensions_automatiques import message, addModule, hasModule, getQuery
 from Utils.UTILS_Traduction import _
-import CTRL_Famille_outils
 import wx
+
+from Extensions_automatiques import message, addModule, hasModule, getQuery
+from CTRL_Famille_outils import Ajouter as AjouterOutil
+
+VERSION = "_v1.1.0"
 
 
 QID = {
@@ -26,28 +28,36 @@ CoeffDegressif = [1, 1, 0.92, 0.88, 0.84, 0.80, 0.76]
 
 
 def Extension():
-    if not hasModule("DLG_Famille_evaluer_mensualite"):
+    if not hasModule(__name__ + VERSION):
         message(u"L'extension est correctement installée, merci de redémarrer Noethys pour l'activer.")
         return
-    message(u"Extension installée et activée.")
+    message(u"Extension installée et activée.", __name__ + VERSION)
 
 
 def Initialisation():
     DLG_Famille.Dialog.MenuEvaluerMensualite = MenuEvaluerMensualite
-    CTRL_Famille_outils.Ajouter("bethrivkah", (u"Évaluer mensualité standard",
+    AjouterOutil("bethrivkah", (u"Évaluer mensualité standard",
         "Images/16x16/Euro.png", "self.MenuEvaluerMensualite"))
-    addModule("DLG_Famille_evaluer_mensualite")
+    addModule(__name__ + VERSION)
 
 
 def MenuEvaluerMensualite(self, event):
     dlg = Dialog(None)
     dlg.ShowModal()
-    annee = dlg.GetAnnee()
+    activite = dlg.GetAnnee()
     dlg.Destroy()
 
-    if annee is None:
+    if activite is None:
         return
-    nb, inscriptions, mensualites, coeff = GetInscriptions(self.IDfamille, annee[0])
+    famille, enfants, _ = EvaluerMensualite(self.IDfamille, activite[0])
+    response = u"famille: {montant:10.2f}\n".format(montant=famille)
+    for prenom, montant in enfants:
+        response += u"\n{prenom}: {montant:10.2f}".format(prenom=prenom, montant=montant)
+    message(response)
+
+
+def EvaluerMensualite(IDfamille, IDactivite):
+    nb, inscriptions, mensualites, coeff = GetInscriptions(IDfamille, IDactivite)
     filteredList = filter(filtrerListe, inscriptions)
     valid = validateList(nb, filteredList)
     if not valid:
@@ -56,15 +66,14 @@ Executez l'utilitaire de detection des anomalies et resolvez-les.
 Si cette erreur persiste apres toutes les corrections, merci de contacter le developpeur de l'extension \
 DLG_Famille_evaluer_mensualite\n""" + str((nb, inscriptions, mensualites, filteredList)))
     famille = 0
-    response = u""
+    brut = 0
+    enfants = []
     for individu, prenom, categorie, IDcategorie, groupe, IDgroupe, taux in filteredList:
-        response += u"\n{prenom}: {montant}".format(
-            prenom=prenom,
-            montant=calculateTaux(taux, mensualites, coeff)
-        )
-        famille += calculateTaux(taux, mensualites, coeff)
-    response = u"famille: {montant}\n".format(montant=famille) + response
-    message(response)
+        brut += taux
+        montant = calculateTaux(taux, mensualites, coeff)
+        enfants.append((prenom, montant))
+        famille += montant
+    return famille, enfants, brut
 
 
 def calculateTaux(taux, mensualites, coeff):
@@ -98,17 +107,17 @@ class Dialog(wx.Dialog):
         self.staticbox = wx.StaticBox(self, -1, "")
         self.label = wx.StaticText(self, -1, _(u"Veuillez sélectioner une année scolaire :"))
         self.ctrl_annee = CTRL(self)
-        self.bouton_annuler = CTRL_Bouton_image.CTRL(
-            self, id=wx.ID_CANCEL, texte=_(u"Annuler"), cheminImage="Images/32x32/Annuler.png")
         self.bouton_ok = CTRL_Bouton_image.CTRL(
             self, id=wx.ID_OK, texte=_(u"Ok"), cheminImage="Images/32x32/Valider.png")
+        self.bouton_annuler = CTRL_Bouton_image.CTRL(
+            self, id=wx.ID_CANCEL, texte=_(u"Annuler"), cheminImage="Images/32x32/Annuler.png")
         self.__set_properties()
         self.__do_layout()
         self.ctrl_annee.SetFocus()
 
     def __set_properties(self):
         self.bouton_annuler.SetToolTip(wx.ToolTip(_(u"Cliquez ici pour annuler")))
-        self.bouton_annuler.SetToolTip(wx.ToolTip(_(u"Cliquez ici pour confirmer")))
+        self.bouton_ok.SetToolTip(wx.ToolTip(_(u"Cliquez ici pour confirmer")))
         self.ctrl_annee.SetMinSize((300, -1))
 
     def __do_layout(self):
