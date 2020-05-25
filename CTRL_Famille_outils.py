@@ -10,7 +10,7 @@ import Chemins
 import wx
 
 
-VERSION = "_v1.1.0"
+VERSION = "_v1.1.1"
 
 
 list_outils = OrderedDict([
@@ -114,7 +114,7 @@ def GetQuestionnaireValeurs(IDfamille):
         `questionnaire_questions`
         LEFT OUTER JOIN `questionnaire_reponses` ON(
             `questionnaire_questions`.`IDquestion`=`questionnaire_reponses`.`IDquestion` AND
-            `questionnaire_reponses`.`IDfamille`=15
+            `questionnaire_reponses`.`IDfamille`={IDfamille}
         )
         LEFT JOIN `questionnaire_choix` ON (
             `questionnaire_questions`.`IDquestion`=`questionnaire_choix`.`IDquestion` AND
@@ -128,7 +128,7 @@ def GetQuestionnaireValeurs(IDfamille):
         )
     WHERE
         (
-            `questionnaire_reponses`.`IDfamille`=15 OR
+            `questionnaire_reponses`.`IDfamille`={IDfamille} OR
             (
                 `questionnaire_reponses`.`IDfamille` IS NULL AND
                 `questionnaire_reponses`.`IDindividu` IS NULL
@@ -141,7 +141,7 @@ def GetQuestionnaireValeurs(IDfamille):
     reponsesQuestionnaire = {}
     for IDquestion, IDreponse, reponse in response:
         reponsesQuestionnaire[IDquestion] = {
-            "IDreponse": IDreponse,
+            "IDreponse": IDreponse if IDreponse else u"NULL",
             "reponse": reponse,
         }
 

@@ -5,8 +5,7 @@ from Extensions_automatiques import message, hasModule, addModule, getQuery
 from CTRL_Famille_outils import Ajouter as AjouterOutil, GetQuestionnaireValeurs
 import wx
 
-VERSION = "_v1.0.2"
-NoethysSauvegardeQuestionnaire = None
+VERSION = "_v1.0.3"
 
 
 def Extension():
@@ -17,9 +16,10 @@ def Extension():
 
 
 def Initialisation():
-    global NoethysSauvegardeQuestionnaire
-    NoethysSauvegardeQuestionnaire = DLG_Famille_questionnaire.Panel.Sauvegarde
+    # MAJ automatique à la sauvegarde
+    DLG_Famille_questionnaire.Panel.NoethysSauvegarde = DLG_Famille_questionnaire.Panel.Sauvegarde
     DLG_Famille_questionnaire.Panel.Sauvegarde = customQuestionnaireSauvegarde
+    # MAJ sur demande par menu Outils
     DLG_Famille.Dialog.MenuMettreAJourLesResultatsCalcules = MenuMettreAJourLesResultatsCalcules
     AjouterOutil("bethrivkah", (u"Mettre à jour les résultats calculés",
         "Images/16x16/Actualiser2.png", "self.MenuMettreAJourLesResultatsCalcules"))
@@ -34,7 +34,7 @@ def MenuMettreAJourLesResultatsCalcules(self, event):
 
 def customQuestionnaireSauvegarde(self):
     # mise à jour de la BDD avec les valeurs saisies
-    NoethysSauvegardeQuestionnaire(self)
+    self.NoethysSauvegarde()
     # mise à jour de la BDD pour les valeurs calculées
     majResultatsCalcules(self.IDfamille)
     # mise à jour de l'affichage
