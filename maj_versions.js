@@ -7,6 +7,7 @@ const extensions = [
   "Calcul_totaux_infos_financ.py",
   "DLG_Famille_evaluer_mensualite.py",
   "DLG_Famille_fixer_tarif.py",
+  "Mensualite_base.py",
 ];
 
 const commit_content = child_process.execSync("git status --porcelain").toString().split("\n");
@@ -46,7 +47,7 @@ async function getVersion(filename) {
 function isModified(filename) {
   const line = commit_content.find(line => line.includes(filename));
   if (!line) return false;
-  if (line[0] === "M") return true;
+  if (line[0] === "M" || line[0] === "A") return true;
   return false;
 }
 

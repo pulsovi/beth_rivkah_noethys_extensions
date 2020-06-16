@@ -39,16 +39,19 @@ function handleChange(file) {
     "DLG_Famille_fixer_tarif.py",
     "DLG_Famille_maj_resultats_calcules.py",
     "Extensions_automatiques.py",
+    "Mensualite_base.py",
   ];
   const toIgnore = [
     ".git",
+    "anomalies.sql",
     "Appliquer_tarifs_convenus.py",
     "Debug_extensions.py",
-    "Exporter_anomalies.py",
-    "anomalies.sql",
     "divers.py",
+    "Exporter_anomalies.py",
     "inscription nouvelle annee.sql",
+    "maj_versions.js",
     "reset extensions auto.sh",
+    "versions.json",
   ];
   if (file === "watch.js") {
     console.log("exit child");
