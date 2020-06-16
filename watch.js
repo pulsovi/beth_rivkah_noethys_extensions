@@ -7,6 +7,11 @@ const timeouts = [];
 const child_process = require("child_process");
 const Registry = require("winreg");
 
+(() => {
+  console.nativeLog = console.log;
+  console.log = (...args) => console.nativeLog(new Date().toLocaleTimeString(), ...args);
+})();
+
 function watch() {
   console.log("start child");
   fs.watch(__dirname, (event, file) => {
@@ -27,6 +32,7 @@ function watch() {
 function handleChange(file) {
   //console.log(`change ${file}`);
   const toSend = [
+    "Calcul_totaux_infos_financ.py",
     "CTRL_Famille_outils.py",
     "DLG_Famille_evaluer_mensualite.py",
     "DLG_Famille_fixer_tarif.py",
@@ -36,7 +42,6 @@ function handleChange(file) {
   const toIgnore = [
     ".git",
     "Appliquer_tarifs_convenus.py",
-    "Calcul_totaux_infos_financ.py",
     "Debug_extensions.py",
     "Exporter_anomalies.py",
     "anomalies.sql",
@@ -47,7 +52,7 @@ function handleChange(file) {
   if (file === "watch.js") {
     console.log("exit child");
     process.exit();
-    return
+    return;
   }
   if (toSend.includes(file)) return send(file);
   if (toIgnore.includes(file)) return;
@@ -110,7 +115,9 @@ async function runWatch() {
 }
 
 async function restartNoethys() {
-  await waitForProcess(exec('TASKKILL /T /IM Noethys.exe'));
+  let retval = 0;
+  while (!retval)
+    retval = await waitForProcess(exec('TASKKILL /T /F /IM Noethys.exe'));
   await sleep(200);
   exec('C:\\Noethys\\Noethys.exe')
 }
