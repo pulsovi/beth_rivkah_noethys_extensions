@@ -5,6 +5,7 @@ const { promisify } = require("util");
 
 const extensions = [
   "Calcul_totaux_infos_financ.py",
+  "DLG_Famille_evaluer_mensualite.py",
 ];
 
 const commit_content = child_process.execSync("git status --porcelain").toString().split("\n");

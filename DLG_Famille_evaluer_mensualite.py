@@ -8,7 +8,7 @@ import wx
 from Extensions_automatiques import message, addModule, hasModule, getQuery
 from CTRL_Famille_outils import Ajouter as AjouterOutil
 
-VERSION = "_v1.1.0"
+VERSION = "_v1.1.1"
 
 
 QID = {
@@ -42,11 +42,7 @@ def Initialisation():
 
 
 def MenuEvaluerMensualite(self, event):
-    dlg = Dialog(None)
-    dlg.ShowModal()
-    activite = dlg.GetAnnee()
-    dlg.Destroy()
-
+    activite = GetActivite()
     if activite is None:
         return
     famille, enfants, _ = EvaluerMensualite(self.IDfamille, activite[0])
@@ -64,7 +60,12 @@ def EvaluerMensualite(IDfamille, IDactivite):
         raise Exception(u"""\n\nLes donnees d'inscriptions de cette famille semblent anormales.
 Executez l'utilitaire de detection des anomalies et resolvez-les.
 Si cette erreur persiste apres toutes les corrections, merci de contacter le developpeur de l'extension \
-DLG_Famille_evaluer_mensualite\n""" + str((nb, inscriptions, mensualites, filteredList)))
+DLG_Famille_evaluer_mensualite\n""" + str({
+            "nb": nb,
+            "inscriptions": inscriptions,
+            "mensualites": mensualites,
+            "filteredList": filteredList,
+        }))
     famille = 0
     brut = 0
     enfants = []
@@ -101,7 +102,7 @@ def filtrerListe(ligne):
 
 
 class Dialog(wx.Dialog):
-    def __init__(self, parent, id=-1, title=_(u"Choix année scolaire")):
+    def __init__(self, parent=None, id=-1, title=_(u"Choix année scolaire")):
         wx.Dialog.__init__(self, parent, id, title, name="DLG_annee")
         self.parent = parent
         self.staticbox = wx.StaticBox(self, -1, "")
@@ -276,3 +277,11 @@ def getQuestionnaireValeurs(IDfamille):
         reponses[question] = reponse
 
     return reponses
+
+
+def GetActivite():
+    dlg = Dialog(None)
+    dlg.ShowModal()
+    activite = dlg.GetAnnee()
+    dlg.Destroy()
+    return activite
