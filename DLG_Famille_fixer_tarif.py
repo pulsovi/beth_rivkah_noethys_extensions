@@ -10,7 +10,7 @@ from Extensions_automatiques import message, addModule, hasModule, getQuery
 from CTRL_Famille_outils import Ajouter as AjouterOutil
 from DLG_Famille_evaluer_mensualite import EvaluerMensualite
 
-VERSION = "v_1.0.1"
+VERSION = "_v1.0.1"
 
 
 def Extension():
