@@ -2,8 +2,11 @@
 import GestionDB
 import wx
 
+VERSION = "_v2.0.0"
+
+
 def Extension():
-    Request(u'''
+    query = u'''
 INSERT INTO `questionnaire_reponses`
     (`IDreponse`, `IDquestion`, `IDindividu`, `IDfamille`, `reponse`)
 WITH
@@ -80,91 +83,6 @@ WITH
             `t_Scolarite`.`IDfamille`=`familles`.`IDfamille`
             AND `t_Scolarite`.`IDquestion`=13
         )
-),
-`infos_familles` AS (
-    SELECT
-        `familles`.`IDfamille`,
-        IFNULL(`t_nbEnfantsBR`.`reponse`, 0)    AS `nbEnfantsBR`,
-        IFNULL(`t_intervenantsBR`.`reponse`, 1) AS `intervenantBR`,
-        IFNULL(`t_mensualite_fix`.`reponse`, 0) AS `montantFix`,
-        `r_nbMensualites`.`label`               AS `nbMensualites`
-    FROM
-        `familles`
-        LEFT OUTER JOIN `questionnaire_reponses` AS `t_mensualite_fix`
-                ON (`t_mensualite_fix`.`IDfamille`=`familles`.`IDfamille`
-                    AND `t_mensualite_fix`.`IDquestion`=20)
-        LEFT OUTER JOIN `questionnaire_reponses` AS `t_nbEnfantsBR`
-            ON (`t_nbEnfantsBR`.`IDfamille`=`familles`.`IDfamille`
-                AND `t_nbEnfantsBR`.`IDquestion`=24)
-        LEFT OUTER JOIN `questionnaire_reponses` AS `t_intervenantsBR`
-            ON (`t_intervenantsBR`.`IDfamille`=`familles`.`IDfamille`
-                AND `t_intervenantsBR`.`IDquestion`=1)
-        LEFT JOIN `questionnaire_reponses` AS `t_nbMensualites` ON (
-            `t_nbMensualites`.`IDfamille`=`familles`.`IDfamille`
-            AND `t_nbMensualites`.`IDquestion`=21
-        )
-        LEFT JOIN `questionnaire_questions` AS `d_nbMensualites`
-            ON `d_nbMensualites`.`IDquestion`=21
-        LEFT JOIN `questionnaire_choix` AS `r_nbMensualites` ON (
-            `IDchoix`=IFNULL(`t_nbMensualites`.`reponse`,`d_nbMensualites`.`defaut`)
-        )
-),
-`tarifs_scolarites` AS (
-    SELECT
-        `IDgroupe`,
-        `nbEnfantsBR`,
-        `intervenantBR`,
-        `tarif` * `CoeffDegressif` * `CoeffIntervenant` AS `tarif`
-    FROM
-        (
-            SELECT 1 /*Maternelle*/ AS `IDgroupe`, 3600 AS `tarif` UNION ALL
-            SELECT 2 /*Primaire  */ AS `IDgroupe`, 3600 AS `tarif` UNION ALL
-            SELECT 3 /*Collège   */ AS `IDgroupe`, 4080 AS `tarif` UNION ALL
-            SELECT 4 /*Lycée     */ AS `IDgroupe`, 4200 AS `tarif` UNION ALL
-            SELECT 5 /*Lycée Pro */ AS `IDgroupe`, 4200 AS `tarif`
-        ) AS `tarif`
-
-        LEFT JOIN (
-            SELECT
-                1 AS `nbEnfantsBR`,
-                1 AS `CoeffDegressif` UNION ALL
-            SELECT
-                2 AS `nbEnfantsBR`,
-                0.92 AS `CoeffDegressif` UNION ALL
-            SELECT
-                3 AS `nbEnfantsBR`,
-                0.88 AS `CoeffDegressif` UNION ALL
-            SELECT
-                4 AS `nbEnfantsBR`,
-                0.84 AS `CoeffDegressif` UNION ALL
-            SELECT
-                5 AS `nbEnfantsBR`,
-                0.80 AS `CoeffDegressif` UNION ALL
-            SELECT
-                6 AS `nbEnfantsBR`,
-                0.76 AS `CoeffDegressif`
-        ) AS `nbEnfants`
-            ON 1=1
-
-        LEFT JOIN (
-            SELECT
-                /*non intervenant*/
-                1 AS `intervenantBR`,
-                1 AS `CoeffIntervenant` UNION ALL
-            SELECT
-                /*1 parent intervenant à mi-temps*/
-                2 AS `intervenantBR`,
-                0.90 AS `CoeffIntervenant` UNION ALL
-            SELECT
-                /*2 parents intervenants à mi-temps*/
-                3 AS `intervenantBR`,
-                0.85 AS `CoeffIntervenant` UNION ALL
-            SELECT
-                /*1 parent ou + intervenant à plein temps*/
-                4 AS `intervenantBR`,
-                0.75 AS `CoeffIntervenant`
-        ) AS `intervenant`
-            ON 1=1
 ),
 `reponses_to_insert` AS (
     --
@@ -265,47 +183,6 @@ WITH
                 AND `t_nbEnfants`.`IDquestion`=23
             )
     UNION
-        -- mensualité familiale calculée
-        SELECT
-            `t_mensualite_std`.                         `IDreponse`,
-            19                                       AS `IDquestion`,
-            NULL                                     AS `IDindividu`,
-            `infos_familles`.                           `IDfamille`,
-            SUM(`tarif`) / `nbMensualites`           AS `reponse`
-        FROM
-            `infos_familles`
-            INNER JOIN `inscriptions` USING(`IDfamille`)
-            LEFT JOIN `tarifs_scolarites` ON (
-                `inscriptions`.`IDgroupe`=`tarifs_scolarites`.`IDgroupe`
-                AND `tarifs_scolarites`.`nbEnfantsBR`=`infos_familles`.`nbEnfantsBR`
-                AND `tarifs_scolarites`.`intervenantBR`=`infos_familles`.`intervenantBR`
-            )
-            LEFT OUTER JOIN `questionnaire_reponses` AS `t_mensualite_std` ON (
-                `t_mensualite_std`.`IDfamille`=`infos_familles`.`IDfamille`
-                AND `t_mensualite_std`.`IDquestion`=19
-            )
-        GROUP BY `IDfamille`
-    UNION
-        -- mensualité personnelle calculée
-        SELECT
-            `t_IDreponse`.               `IDreponse`,
-            25                        AS `IDquestion`,
-            `inscriptions`.              `IDindividu`,
-            NULL                      AS `IDfamille`,
-            `tarif` / `nbMensualites` AS `reponse`
-        FROM
-            `inscriptions`
-            LEFT OUTER JOIN `infos_familles` USING(`IDfamille`)
-            LEFT JOIN `tarifs_scolarites` ON (
-                `inscriptions`.`IDgroupe`=`tarifs_scolarites`.`IDgroupe`
-                AND `tarifs_scolarites`.`nbEnfantsBR`=`infos_familles`.`nbEnfantsBR`
-                AND `tarifs_scolarites`.`intervenantBR`=`infos_familles`.`intervenantBR`
-            )
-            LEFT OUTER JOIN `questionnaire_reponses` AS `t_IDreponse` ON (
-                `t_IDreponse`.`IDindividu`=`inscriptions`.`IDindividu`
-                AND `t_IDreponse`.`IDquestion`=25
-            )
-    UNION
         -- Département
         SELECT
             `t_IDreponse`.                `IDreponse`,
@@ -323,43 +200,26 @@ WITH
                 `t_cp`.`IDindividu`=IFNULL(`individus`.`adresse_auto`, `individus`.`IDindividu`)
             )
         WHERE `t_cp`.`cp_resid` IS NOT NULL
-    UNION
-        -- Reduction tarif scolarité
-        SELECT
-            `t_IDreponse`.        `IDreponse`,
-            28                 AS `IDquestion`,
-            `inscriptions`.       `IDindividu`,
-            NULL               AS `IDfamille`,
-            `coeff`            AS `reponse`
-        FROM
-            `inscriptions`
-            LEFT JOIN (
-                SELECT
-                    `infos_familles`.`IDfamille`,
-                    100 * (1 - (`montantFix` / (SUM(`tarif`) / `nbMensualites`))) AS `coeff`
-                FROM
-                    `infos_familles`
-                    INNER JOIN `inscriptions` USING(`IDfamille`)
-                    INNER JOIN `tarifs_scolarites` ON (
-                        `inscriptions`.`IDgroupe`=`tarifs_scolarites`.`IDgroupe`
-                        AND `tarifs_scolarites`.`nbEnfantsBR`=`infos_familles`.`nbEnfantsBR`
-                        AND `tarifs_scolarites`.`intervenantBR`=`infos_familles`.`intervenantBR`
-                    )
-                    GROUP BY `IDfamille`
-            ) AS `famille` USING(`IDfamille`)
-            LEFT OUTER JOIN `questionnaire_reponses` AS `t_IDreponse` ON (
-                `t_IDreponse`.`IDquestion`=28
-                AND `t_IDreponse`.`IDindividu`=`inscriptions`.`IDindividu`
-            )
 )
 SELECT `IDreponse`, `IDquestion`, `IDindividu`, `IDfamille`, `reponse`
     FROM `reponses_to_insert`
     WHERE `reponse` != 0
 ON DUPLICATE KEY UPDATE `reponse`=VALUES(`reponse`);
-    ''')
+    '''
+    wait = wx.BusyInfo(u"Calcul en cours, merci de patienter…")
+    success = Request(query)
+    del wait
+
+    if success:
+        message(u"La procédure s'est déroulée avec succès.")
+    else:
+        message(u"Une erreur a interrompu la procédure.")
+
+
+def message(text):
     dlg = wx.MessageDialog(
         parent=None,
-        message=u"La procédure s'est déroulée avec succès",
+        message=text,
         caption=u"Fin de procédure",
         style=wx.OK | wx.ICON_INFORMATION
     )
@@ -369,7 +229,7 @@ ON DUPLICATE KEY UPDATE `reponse`=VALUES(`reponse`);
 
 def Request(Req):
     DB = GestionDB.DB()
-    DB.ExecuterReq(Req)
-    res = DB.ResultatReq()
+    success = DB.ExecuterReq(Req)
+    DB.ResultatReq()
     DB.Close()
-    return res
+    return success

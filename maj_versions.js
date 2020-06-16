@@ -3,7 +3,9 @@ const child_process = require("child_process");
 const { promisify } = require("util");
 
 
-const extensions = [];
+const extensions = [
+  "Calcul_totaux_infos_financ.py",
+];
 
 const commit_content = child_process.execSync("git status --porcelain").toString().split("\n");
 const oldVersions = getOldVersions();
