@@ -1,7 +1,6 @@
 ﻿#Persistent
 #SingleInstance, force
 
-MsgBox, "Noethys AHK reloaded"
 Loop
 {
 	IfWinActive, ahk_exe Noethys.exe
