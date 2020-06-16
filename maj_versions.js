@@ -8,6 +8,7 @@ const extensions = [
   "DLG_Famille_evaluer_mensualite.py",
   "DLG_Famille_fixer_tarif.py",
   "Mensualite_base.py",
+  "Utils__init__.py",
 ];
 
 const commit_content = child_process.execSync("git status --porcelain").toString().split("\n");
@@ -33,7 +34,7 @@ function getOldVersions() {
 }
 
 async function getVersion(filename) {
-  if (!isModified(filename)) return oldVersions[filename];
+  if (!isModified(filename) && oldVersions[filename]) return oldVersions[filename];
   const content = await getIndexed(filename);
   const lines = content.split("\n");
   const line = lines.find(l => l.includes("VERSION ="));
