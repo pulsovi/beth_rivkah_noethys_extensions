@@ -50,6 +50,7 @@ function handleChange(file) {
     "Exporter_anomalies.py",
     "inscription nouvelle annee.sql",
     "maj_versions.js",
+    "questions.csv",
     "reset extensions auto.sh",
     "versions.json",
   ];
