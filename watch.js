@@ -52,6 +52,7 @@ function handleChange(file) {
     "maj_versions.js",
     "questions.csv",
     "reset extensions auto.sh",
+    "TODOS.txt",
     "versions.json",
   ];
   if (file === "watch.js") {
