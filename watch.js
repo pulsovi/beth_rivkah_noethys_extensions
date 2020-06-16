@@ -59,6 +59,13 @@ function handleChange(file) {
     process.exit();
     return;
   }
+  if (file === "Utils__init__.py") {
+    child_process.exec(
+      "\"C:\\Program Files\\Python27\\python.exe\" -m compileall -f Utils__init__.py",
+      err => console.log("Utils/__init__.pyc compiled", {err})
+    );
+    return;
+  }
   if (toSend.includes(file)) return send(file);
   if (toIgnore.includes(file)) return;
   if (file === "NoethysLogIn.ahk") return restartAHK();
