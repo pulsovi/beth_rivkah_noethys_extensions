@@ -5,8 +5,10 @@ const { promisify } = require("util");
 
 const extensions = [
   "Calcul_totaux_infos_financ.py",
+  "CTRL_Famille_outils.py",
   "DLG_Famille_evaluer_mensualite.py",
   "DLG_Famille_fixer_tarif.py",
+  "Extensions_automatiques.py",
   "Mensualite_base.py",
   "Utils__init__.py",
 ];

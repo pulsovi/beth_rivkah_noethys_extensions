@@ -3,5 +3,7 @@
   "DLG_Famille_evaluer_mensualite.py": "_v1.1.1",
   "DLG_Famille_fixer_tarif.py": "_v1.0.1",
   "Mensualite_base.py": "_v1.0.0",
-  "Utils__init__.py": "_v1.2.2"
+  "Utils__init__.py": "_v1.2.2",
+  "Extensions_automatiques.py": "_v1.0.5",
+  "CTRL_Famille_outils.py": "_v1.1.1"
 }
