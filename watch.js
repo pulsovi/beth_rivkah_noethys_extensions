@@ -53,6 +53,7 @@ function handleChange(file) {
     "questions.csv",
     "reset extensions auto.sh",
     "TODOS.txt",
+    "Utils__init__.pyc",
     "versions.json",
   ];
   if (file === "watch.js") {

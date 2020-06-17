@@ -5,11 +5,15 @@ import os
 import UTILS_Fichiers
 import importlib
 import wx
+import Data
+import traceback
 
-VERSION = "_v1.1.1"
+VERSION = "_v1.2.0"
 
-sys.path.append(UTILS_Fichiers.GetRepExtensions())
+Data.Extensions_automatiques = [__name__ + VERSION]
 
+
+# Récupére la liste des fichiers et met Extensions_automatiques en premier
 ext = "py"
 fichiers = os.listdir(UTILS_Fichiers.GetRepExtensions())
 fichiers.sort()
@@ -17,6 +21,9 @@ mainFile = "Extensions_automatiques.py"
 if mainFile in fichiers:
     index = fichiers.index(mainFile)
     fichiers = [mainFile] + fichiers[0:index] + fichiers[index + 1:]
+
+# Execute les Initialisation des extensions et collecte les erreurs
+sys.path.append(UTILS_Fichiers.GetRepExtensions())
 listeErreurs = {}
 for fichier in fichiers:
     if fichier.endswith(ext):
@@ -32,8 +39,12 @@ for fichier in fichiers:
             if key not in listeErreurs:
                 listeErreurs[key] = []
             listeErreurs[key].append(titre)
+            traceback.print_exc(file=sys.stderr)
+            sys.stderr.write("\n")
+
+# Affiche les erreurs
 if len(listeErreurs) > 0:
-    app = wx.App(redirect=False)
+    app = wx.App()
     for erreur, fichiersErreur in listeErreurs.iteritems():
         if len(fichiersErreur) == 1:
             message = [u"L'extension suivante n'a pas pu être chargée:"]
@@ -41,7 +52,7 @@ if len(listeErreurs) > 0:
             message = [u"Les extensions suivante n'ont pas pu être chargées:"]
         dlg = wx.MessageDialog(
             parent=None,
-            message="\\n".join(message + fichiersErreur + [
+            message="\n".join(message + fichiersErreur + [
                 "",
                 "Erreur:",
                 erreur
@@ -52,5 +63,3 @@ if len(listeErreurs) > 0:
         dlg.ShowModal()
         dlg.Destroy()
     app.Destroy()
-else:
-    importlib.import_module(mainFile[:-(len(ext) + 1)]).addModule(__name__ + VERSION)
