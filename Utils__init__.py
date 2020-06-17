@@ -7,17 +7,16 @@ import importlib
 import wx
 import Data
 import traceback
+from six.moves import reload_module
 
-VERSION = "_v1.2.1"
+VERSION = "_v1.2.2"
 
 
 def getFileList():
     # Récupére la liste des fichiers et met Extensions_automatiques en premier
     fichiers = os.listdir(UTILS_Fichiers.GetRepExtensions())
     fichiers.sort()
-    if mainFile in fichiers:
-        index = fichiers.index(mainFile)
-        fichiers = [mainFile] + fichiers[0:index] + fichiers[index + 1:]
+    return fichiers
 
 
 def launch(fichier):
@@ -31,6 +30,7 @@ def launch(fichier):
         initialisation = getattr(module, "Initialisation", None)
         if callable(initialisation):
             module.Initialisation()
+        return module
     except Exception as erreur:
         key = str(erreur)
         if key not in listeErreurs:
@@ -41,7 +41,7 @@ def launch(fichier):
 
 
 # Ajoute la version du bootstrap dans le repertoire des extensions chargées
-Data.Extensions_automatiques = [__name__ + VERSION]
+Data.extensionsAutomatiques = ["Utils__init__" + VERSION]
 # Ajoute le repertoire des extensions au PATH
 sys.path.append(UTILS_Fichiers.GetRepExtensions())
 
@@ -51,8 +51,9 @@ listeErreurs = {}
 
 fichiers = getFileList()
 if mainFile in fichiers:
-    launch(mainFile)
+    mainModule = launch(mainFile)
     fichiers = getFileList()
+    reload_module(mainModule)
 for fichier in fichiers:
     launch(fichier)
 
