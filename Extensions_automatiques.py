@@ -10,8 +10,10 @@ import FonctionsPerso
 import GestionDB
 from six.moves import urllib
 import json
+import traceback
+import sys
 
-VERSION = "_v1.0.5"
+VERSION = "_v1.0.6"
 officialVersionsCache = None
 
 
@@ -111,6 +113,7 @@ def getFromGithub(
 ):
     url = githubUrl(filename, version, repository, user)
     try:
+        urllib.request.urlcleanup()
         fd = urllib.request.urlopen(url + "\n")
         if asFd:
             return fd
@@ -120,6 +123,9 @@ def getFromGithub(
     except Exception as err:
         if str(type(err)) == "<class 'urllib2.HTTPError'>":
             return None
+        traceback.print_exc(file=sys.stderr)
+        sys.stderr.write("\n")
+        sys.stderr.flush()
         bootMessage(str(type(err)))
         return None
 
@@ -210,5 +216,10 @@ def updateBootstrap():
 def updateExtension(extension):
     filename = UTILS_Fichiers.GetRepExtensions(extension)
     url = githubUrl(extension)
+    if os.path.exists(filename):
+        renamed = True
+        os.rename(filename, filename + ".old")
     urllib.request.urlretrieve(url, filename)
+    if renamed:
+        os.remove(filename + ".old")
     return True
