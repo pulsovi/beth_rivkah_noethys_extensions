@@ -8,42 +8,56 @@ import wx
 import Data
 import traceback
 
-VERSION = "_v1.2.0"
+VERSION = "_v1.2.1"
 
+
+def getFileList():
+    # Récupére la liste des fichiers et met Extensions_automatiques en premier
+    fichiers = os.listdir(UTILS_Fichiers.GetRepExtensions())
+    fichiers.sort()
+    if mainFile in fichiers:
+        index = fichiers.index(mainFile)
+        fichiers = [mainFile] + fichiers[0:index] + fichiers[index + 1:]
+
+
+def launch(fichier):
+    # Execute les Initialisation des extensions et collecte les erreurs
+    if not fichier.endswith(ext):
+        return
+    nomFichier = os.path.split(fichier)[1]
+    titre = nomFichier[:-(len(ext) + 1)]
+    try:
+        module = importlib.import_module(titre)
+        initialisation = getattr(module, "Initialisation", None)
+        if callable(initialisation):
+            module.Initialisation()
+    except Exception as erreur:
+        key = str(erreur)
+        if key not in listeErreurs:
+            listeErreurs[key] = []
+        listeErreurs[key].append(titre)
+        traceback.print_exc(file=sys.stderr)
+        sys.stderr.write("\n")
+
+
+# Ajoute la version du bootstrap dans le repertoire des extensions chargées
 Data.Extensions_automatiques = [__name__ + VERSION]
-
-
-# Récupére la liste des fichiers et met Extensions_automatiques en premier
-ext = "py"
-fichiers = os.listdir(UTILS_Fichiers.GetRepExtensions())
-fichiers.sort()
-mainFile = "Extensions_automatiques.py"
-if mainFile in fichiers:
-    index = fichiers.index(mainFile)
-    fichiers = [mainFile] + fichiers[0:index] + fichiers[index + 1:]
-
-# Execute les Initialisation des extensions et collecte les erreurs
+# Ajoute le repertoire des extensions au PATH
 sys.path.append(UTILS_Fichiers.GetRepExtensions())
+
+ext = "py"
+mainFile = "Extensions_automatiques.py"
 listeErreurs = {}
+
+fichiers = getFileList()
+if mainFile in fichiers:
+    launch(mainFile)
+    fichiers = getFileList()
 for fichier in fichiers:
-    if fichier.endswith(ext):
-        nomFichier = os.path.split(fichier)[1]
-        titre = nomFichier[:-(len(ext) + 1)]
-        try:
-            module = importlib.import_module(titre)
-            initialisation = getattr(module, "Initialisation", None)
-            if callable(initialisation):
-                module.Initialisation()
-        except Exception as erreur:
-            key = str(erreur)
-            if key not in listeErreurs:
-                listeErreurs[key] = []
-            listeErreurs[key].append(titre)
-            traceback.print_exc(file=sys.stderr)
-            sys.stderr.write("\n")
+    launch(fichier)
 
 # Affiche les erreurs
-if len(listeErreurs) > 0:
+if listeErreurs:
     app = wx.App()
     for erreur, fichiersErreur in listeErreurs.iteritems():
         if len(fichiersErreur) == 1:
