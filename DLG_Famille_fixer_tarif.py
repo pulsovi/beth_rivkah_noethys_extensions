@@ -72,7 +72,7 @@ def MenuFixerTarif(self, event):
 
     # nouveau quotient en BDD
     observations = u"""Pour une mensualite totale de {montant}€ :""".format(montant=montant)
-    for prenom, mnt in enfants:
+    for id, prenom, mnt, taux in enfants:
         observations += u"\\n - {prenom}: {montant}".format(
             prenom=prenom, montant=round(montant * mnt / famille, 2))
     values += u"""

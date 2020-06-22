@@ -8,7 +8,7 @@ import wx
 from Extensions_automatiques import message, addModule, hasModule, getQuery
 from CTRL_Famille_outils import Ajouter as AjouterOutil
 
-VERSION = "_v1.1.2"
+VERSION = "_v2.0.0"
 
 
 QID = {
@@ -46,10 +46,10 @@ def MenuEvaluerMensualite(self, event):
     activite = GetActivite()
     if activite is None:
         return
-    famille, enfants, _ = EvaluerMensualite(self.IDfamille, activite[0])
+    famille, enfants = EvaluerMensualite(self.IDfamille, activite[0])[:2]
     response = u"famille: {montant:10.2f}\n".format(montant=famille)
-    for prenom, montant in enfants:
-        response += u"\n{prenom}: {montant:10.2f}".format(prenom=prenom, montant=montant)
+    for id, prenom, montant, taux in enfants:
+        response += u"\n{prenom:25s}: {montant:4.2f}".format(prenom=prenom, montant=montant)
     message(response)
 
 
@@ -76,9 +76,9 @@ def EvaluerMensualite(IDfamille, IDactivite):
     for individu, prenom, categorie, IDcategorie, groupe, IDgroupe, taux in filteredList:
         brut += taux
         montant = calculateTaux(taux, mensualites, coeff)
-        enfants.append((prenom, montant))
+        enfants.append((individu, prenom, montant, taux))
         famille += montant
-    return famille, enfants, brut
+    return famille, enfants, brut, mensualites
 
 
 def calculateTaux(taux, mensualites, coeff):
