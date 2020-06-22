@@ -10,7 +10,7 @@ import Chemins
 import wx
 
 
-VERSION = "_v1.2.1"
+VERSION = "_v1.2.3"
 
 
 list_outils = OrderedDict([
@@ -28,8 +28,8 @@ list_outils = OrderedDict([
     ]),
     (u"devis", [
         (u"Générer un devis", "Images/16x16/Generation.png", "self.MenuGenererDevis"),
-        (u"Liste des devis générés", "Images/16x16/Facture.png", "self.MenuListeDevis")
-    ])
+        (u"Liste des devis générés", "Images/16x16/Facture.png", "self.MenuListeDevis"),
+    ]),
     (u"lettres de rappel", [
         (u"Générer une lettre de rappel",
             "Images/16x16/Generation.png", "self.MenuGenererRappel"),
