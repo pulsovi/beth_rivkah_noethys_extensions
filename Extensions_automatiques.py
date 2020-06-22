@@ -13,33 +13,35 @@ import json
 import traceback
 import sys
 
-VERSION = "_v1.0.7"
+VERSION = "_v1.0.8"
 officialVersionsCache = None
 
 
 def Extension():
     wait = wx.BusyInfo(u"Verifications en cours, merci de patienter…")
+    try:
+        bootstrapVersion = getOfficialVersion("Utils__init__.py")
 
-    bootstrapVersion = getOfficialVersion("Utils__init__.py")
-
-    uptodate = hasModule("Utils__init__" + bootstrapVersion)
-    if not uptodate:
-        success = updateBootstrap()
-        if success:
+        uptodate = hasModule("Utils__init__" + bootstrapVersion)
+        if not uptodate:
+            updateBootstrap()
             addModule("Utils__init__" + bootstrapVersion + u" installée")
-        else:
-            del wait
-            message(u"Impossible d'installer l'extension.", __name__ + VERSION)
+            message(u"L'installation s'est correctement déroulée."
+                u"Il est necessaire de redémarrer Noethys pour l'activer.", __name__ + VERSION)
+            return
+        del wait
+
+        updated = hasModule("Utils__init__" + bootstrapVersion + u" installée")
+        if updated:
+            message(u"L'extension est installée. Merci de redémarrer Noethys pour l'activer",
+                __name__ + VERSION)
             return
 
-    del wait
-    updated = hasModule("Utils__init__" + bootstrapVersion + u" installée")
-    if updated:
-        message(u"L'extension est installée. Merci de redémarrer Noethys pour l'activer",
-            __name__ + VERSION)
-        return
-
-    message(u"Extension installée et activée.", __name__ + VERSION)
+        message(u"Extension installée et activée.", __name__ + VERSION)
+    except Exception as err:
+        del wait
+        printErr(err, False)
+        message(u"Impossible d'installer l'extension.", __name__ + VERSION)
 
 
 def Initialisation():
@@ -51,29 +53,33 @@ def Initialisation():
 
 def UpdateAll():
     updates = []
-    officialBootstrapVersion = getOfficialVersion("Utils__init__.py")
-    if officialBootstrapVersion is None:
-        return updates
-    if not hasModule("Utils__init__" + officialBootstrapVersion):
-        if not hasattr(Data, "extensionsAutomatiques"):
-            oldVersion = ""
-        else:
-            for extension in Data.extensionsAutomatiques:
-                if extension.startswith("Utils__init__"):
-                    oldVersion = extension.split("_v")[1]
-        success = updateBootstrap()
-        if success:
+    try:
+        officialBootstrapVersion = getOfficialVersion("Utils__init__.py")
+        if not hasModule("Utils__init__" + officialBootstrapVersion):
+            if not hasattr(Data, "extensionsAutomatiques"):
+                oldVersion = ""
+            else:
+                for extension in Data.extensionsAutomatiques:
+                    if extension.startswith("Utils__init__"):
+                        oldVersion = extension.split("_v")[1]
+            updateBootstrap()
             updates.append("Utils__init__.py " + oldVersion + " > " + officialBootstrapVersion)
-    for extension, version in officialVersionsCache.iteritems():
-        if extension == "Utils__init__.py":
-            continue
-        currentVersion = getFileVersion(extension) or ""
-        # if currentVersion is None: update
-        if currentVersion != version:
-            success = updateExtension(extension)
-            if success:
-                updates.append("{} {} > {}".format(extension, currentVersion, version))
-    return updates
+        for extension, version in officialVersionsCache.iteritems():
+            if extension == "Utils__init__.py":
+                continue
+            currentVersion = getFileVersion(extension) or ""
+            # if currentVersion is None: update
+            if currentVersion != version:
+                success = updateExtension(extension)
+                if success:
+                    updates.append("{} {} > {}".format(extension, currentVersion, version))
+    except Exception as err:
+        traceback.print_exc(file=sys.stderr)
+        sys.stderr.write("\n")
+        sys.stderr.flush()
+        bootMessage(str(err))
+    finally:
+        return updates
 
 
 def addModule(moduleName):
@@ -123,7 +129,7 @@ def getFromGithub(
         traceback.print_exc(file=sys.stderr)
         sys.stderr.write("\n")
         sys.stderr.flush()
-        bootMessage(str(type(err)))
+        bootMessage(str(err))
         return None
 
 
@@ -133,7 +139,7 @@ def getOfficialVersion(filename, noethysVersion=FonctionsPerso.GetVersionLogicie
             return officialVersionsCache[filename]
     getOfficialVersions(noethysVersion)
     if officialVersionsCache is None:
-        return None
+        raise Exception("Impossible de trouver la version officielle.")
     return officialVersionsCache[filename]
 
 
@@ -188,6 +194,14 @@ def message(text, title=u"Information"):
     dlg.Destroy()
 
 
+def printErr(err, display=bootMessage):
+    traceback.print_exc(file=sys.stderr)
+    sys.stderr.write("\n")
+    sys.stderr.flush()
+    if callable(display):
+        display(str(err))
+
+
 def updateBootstrap():
     customUtilInit = getFromGithub("Utils__init__.pyc")
     noezip = os.path.realpath(os.path.join(UTILS_Fichiers.__file__, "..", ".."))
@@ -207,7 +221,6 @@ def updateBootstrap():
     os.remove(noezip)
     shutil.copy(tempzip, noezip)
     os.remove(tempzip)
-    return True
 
 
 def updateExtension(extension):
