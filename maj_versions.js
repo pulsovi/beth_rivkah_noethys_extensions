@@ -8,6 +8,7 @@ const extensions = [
   "CTRL_Famille_outils.py",
   "DLG_Famille_evaluer_mensualite.py",
   "DLG_Famille_fixer_tarif.py",
+  "DLG_Famille_maj_resultats_calcules.py",
   "Extensions_automatiques.py",
   "Mensualite_base.py",
   "Utils__init__.py",

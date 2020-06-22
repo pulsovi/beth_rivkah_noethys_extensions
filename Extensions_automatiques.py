@@ -13,7 +13,7 @@ import json
 import traceback
 import sys
 
-VERSION = "_v1.0.6"
+VERSION = "_v1.0.7"
 officialVersionsCache = None
 
 
@@ -47,9 +47,6 @@ def Initialisation():
     if updates:
         bootMessage(u"Les extensions suivantes ont été mises à jour:" + u"\n  - ".
             join([""] + updates))
-    return
-    message(u"L'installation s'est correctement déroulée." +
-        u"Il est necessaire de redémarrer Noethys pour l'activer.", __name__ + VERSION)
 
 
 def UpdateAll():

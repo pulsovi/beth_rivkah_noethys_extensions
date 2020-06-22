@@ -10,7 +10,7 @@ import Chemins
 import wx
 
 
-VERSION = "_v1.2.0"
+VERSION = "_v1.2.1"
 
 
 list_outils = OrderedDict([
@@ -65,7 +65,8 @@ list_outils = OrderedDict([
 
 def Extension():
     if not hasModule(__name__ + VERSION):
-        message(u"L'extension est correctement installée, merci de redémarrer Noethys pour l'activer.")
+        message(u"L'extension est correctement installée, "
+            u"merci de redémarrer Noethys pour l'activer.")
         return
     message(u"Extension installée et activée.", __name__ + VERSION)
 

@@ -5,12 +5,13 @@ from Extensions_automatiques import message, hasModule, addModule, getQuery
 from CTRL_Famille_outils import Ajouter as AjouterOutil, GetQuestionnaireValeurs
 import wx
 
-VERSION = "_v1.0.3"
+VERSION = "_v1.0.4"
 
 
 def Extension():
     if not hasModule(__name__ + VERSION):
-        message(u"L'extension est correctement installée, merci de redémarrer Noethys pour l'activer.")
+        message(u"L'extension est correctement installée, "
+            u"merci de redémarrer Noethys pour l'activer.")
         return
     message(u"Extension installée et activée.", __name__ + VERSION)
 

@@ -10,12 +10,13 @@ from Extensions_automatiques import message, addModule, hasModule, getQuery
 from CTRL_Famille_outils import Ajouter as AjouterOutil
 from DLG_Famille_evaluer_mensualite import EvaluerMensualite
 
-VERSION = "_v1.0.1"
+VERSION = "_v1.0.2"
 
 
 def Extension():
     if not hasModule(__name__ + VERSION):
-        message(u"L'extension est correctement installée, merci de redémarrer Noethys pour l'activer.")
+        message(u"L'extension est correctement installée, "
+            u"merci de redémarrer Noethys pour l'activer.")
         return
     message(u"Extension installée et activée.", __name__ + VERSION)
 

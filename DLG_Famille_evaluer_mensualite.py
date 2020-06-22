@@ -8,7 +8,7 @@ import wx
 from Extensions_automatiques import message, addModule, hasModule, getQuery
 from CTRL_Famille_outils import Ajouter as AjouterOutil
 
-VERSION = "_v1.1.1"
+VERSION = "_v1.1.2"
 
 
 QID = {
@@ -29,7 +29,8 @@ CoeffDegressif = [1, 1, 0.92, 0.88, 0.84, 0.80, 0.76]
 
 def Extension():
     if not hasModule(__name__ + VERSION):
-        message(u"L'extension est correctement installée, merci de redémarrer Noethys pour l'activer.")
+        message(u"L'extension est correctement installée, " +
+            u"merci de redémarrer Noethys pour l'activer.")
         return
     message(u"Extension installée et activée.", __name__ + VERSION)
 
@@ -57,15 +58,18 @@ def EvaluerMensualite(IDfamille, IDactivite):
     filteredList = filter(filtrerListe, inscriptions)
     valid = validateList(nb, filteredList)
     if not valid:
-        raise Exception(u"""\n\nLes donnees d'inscriptions de cette famille semblent anormales.
-Executez l'utilitaire de detection des anomalies et resolvez-les.
-Si cette erreur persiste apres toutes les corrections, merci de contacter le developpeur de l'extension \
-DLG_Famille_evaluer_mensualite\n""" + str({
-            "nb": nb,
-            "inscriptions": inscriptions,
-            "mensualites": mensualites,
-            "filteredList": filteredList,
-        }))
+        raise Exception(
+            u"\n\nLes donnees d'inscriptions de cette famille semblent anormales.\n" +
+            u"Executez l'utilitaire de detection des anomalies et resolvez-les.\n" +
+            u"Si cette erreur persiste apres toutes les corrections, merci de contacter " +
+            u"le developpeur de l'extension DLG_Famille_evaluer_mensualite\n" +
+            str({
+                "nb": nb,
+                "inscriptions": inscriptions,
+                "mensualites": mensualites,
+                "filteredList": filteredList,
+            })
+        )
     famille = 0
     brut = 0
     enfants = []
