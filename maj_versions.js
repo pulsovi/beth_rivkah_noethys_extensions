@@ -17,6 +17,7 @@ const extensions = [
 const commit_content = child_process.execSync("git status --porcelain").toString().split("\n");
 const oldVersions = getOldVersions();
 const versions = {};
+const lines = {};
 
 async function getIndexed(filename) {
   const exec = promisify(child_process.exec);
@@ -37,7 +38,7 @@ function getOldVersions() {
 }
 
 async function getVersion(filename) {
-  if (!isModified(filename) && oldVersions[filename]) return oldVersions[filename];
+  if (!isModified(filename) && oldVersions[filename]) return [oldVersions[filename]];
   const content = await getIndexed(filename);
   const lines = content.split("\n");
   const line = lines.find(l => l.includes("VERSION ="));
@@ -45,11 +46,11 @@ async function getVersion(filename) {
     //console.log({content, filename, lines, line});
     throw new Error(`Cannot find the VERSION line in ${filename}`);
   }
-  return line.split('"')[1];
+  return [line.split('"')[1], lines.indexOf(line) + 1];
 }
 
 function isModified(filename) {
-  const line = commit_content.find(line => line.includes(filename));
+  const line = commit_content.find(line => line.endsWith(filename));
   if (!line) return false;
   if (line[0] === "M" || line[0] === "A") return true;
   return false;
@@ -57,9 +58,10 @@ function isModified(filename) {
 
 async function main() {
   await Promise.all(extensions.map(
-    filename => getVersion(filename).then(
-      version => versions[filename] = version
-    )
+    filename => getVersion(filename).then(([version, line]) => {
+      versions[filename] = version;
+      lines[filename] = line;
+    })
   )).catch(err => {
     console.log(err);
     process.exit(1);
@@ -68,7 +70,12 @@ async function main() {
   extensions.forEach(filename => {
     if (isModified(filename) && oldVersions[filename] === versions[filename]) {
       console.log(`${filename} est modifié mais le numéro de version n'a pas évolué`);
-      process.exit(1);
+      child_process.spawn(
+        "D:\\usr\\local\\bin\\sublime-text.bat",
+        [`${filename}:${lines[filename]}`],
+        { detached: true, stdio: "ignore", }
+      ).unref();
+      process.on('exit', () => process.exit(1));
     }
   });
 
@@ -82,5 +89,5 @@ async function main() {
 
 main().catch(err => {
   console.error(err);
-  process.exit(1);
+  process.on('exit', () => process.exit(1));
 });
