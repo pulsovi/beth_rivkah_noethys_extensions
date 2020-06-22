@@ -13,35 +13,32 @@ import json
 import traceback
 import sys
 
-VERSION = "_v1.0.8"
+VERSION = "_v1.0.9"
 officialVersionsCache = None
 
 
 def Extension():
     wait = wx.BusyInfo(u"Verifications en cours, merci de patienter…")
+    text = ""
     try:
         bootstrapVersion = getOfficialVersion("Utils__init__.py")
-
         uptodate = hasModule("Utils__init__" + bootstrapVersion)
-        if not uptodate:
+        updated = hasModule("Utils__init__" + bootstrapVersion + u" installée")
+
+        if uptodate:
+            text = u"Extension installée et activée."
+        elif updated:
+            text = u"L'extension est installée. Merci de redémarrer Noethys pour l'activer"
+        else:
             updateBootstrap()
             addModule("Utils__init__" + bootstrapVersion + u" installée")
-            message(u"L'installation s'est correctement déroulée."
-                u"Il est necessaire de redémarrer Noethys pour l'activer.", __name__ + VERSION)
-            return
-        del wait
-
-        updated = hasModule("Utils__init__" + bootstrapVersion + u" installée")
-        if updated:
-            message(u"L'extension est installée. Merci de redémarrer Noethys pour l'activer",
-                __name__ + VERSION)
-            return
-
-        message(u"Extension installée et activée.", __name__ + VERSION)
+            text = (u"L'installation s'est correctement déroulée."
+                u" Il est necessaire de redémarrer Noethys pour l'activer.")
     except Exception as err:
-        del wait
         printErr(err, False)
-        message(u"Impossible d'installer l'extension.", __name__ + VERSION)
+        text = u"Impossible d'installer l'extension."
+    del wait
+    message(text, __name__ + VERSION)
 
 
 def Initialisation():
