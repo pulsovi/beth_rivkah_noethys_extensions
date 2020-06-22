@@ -3,7 +3,6 @@ import GestionDB
 from Utils.UTILS_Traduction import _
 
 from Extensions_automatiques import addModule, hasModule, message
-from divers import copyToClipboard
 
 VERSION = "_v0.0.0"
 
