@@ -2,14 +2,14 @@
 
 import sys
 import os
-import UTILS_Fichiers
+from Utils import UTILS_Fichiers
 import importlib
 import wx
 import Data
 import traceback
 from six.moves import reload_module
 
-VERSION = "_v1.2.2"
+VERSION = "_v1.2.3"
 
 
 def getFileList():
