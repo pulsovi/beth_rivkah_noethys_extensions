@@ -13,7 +13,7 @@ import json
 import traceback
 import sys
 
-VERSION = "_v1.0.9"
+VERSION = "_v1.0.10"
 officialVersionsCache = None
 
 
@@ -42,10 +42,13 @@ def Extension():
 
 
 def Initialisation():
+    app = wx.App()
+    wait = wx.BusyInfo(u"Mise à jour des extensions en cours, merci de patienter…")
     updates = UpdateAll()
+    del wait
     if updates:
-        bootMessage(u"Les extensions suivantes ont été mises à jour:" + u"\n  - ".
-            join([""] + updates))
+        message(u"Les extensions suivantes ont été mises à jour:" + u"\n  - ".join([""] + updates))
+    app.Destroy()
 
 
 def UpdateAll():
@@ -74,7 +77,7 @@ def UpdateAll():
         traceback.print_exc(file=sys.stderr)
         sys.stderr.write("\n")
         sys.stderr.flush()
-        bootMessage(str(err))
+        message(str(err))
     finally:
         return updates
 
@@ -83,12 +86,6 @@ def addModule(moduleName):
     if not hasattr(Data, "extensionsAutomatiques"):
         Data.extensionsAutomatiques = []
     Data.extensionsAutomatiques.append(moduleName)
-
-
-def bootMessage(text="", title=""):
-    app = wx.App()
-    message(text, title)
-    app.Destroy()
 
 
 def getFileVersion(filename):
@@ -126,7 +123,7 @@ def getFromGithub(
         traceback.print_exc(file=sys.stderr)
         sys.stderr.write("\n")
         sys.stderr.flush()
-        bootMessage(str(err))
+        message(str(err))
         return None
 
 
@@ -191,7 +188,7 @@ def message(text, title=u"Information"):
     dlg.Destroy()
 
 
-def printErr(err, display=bootMessage):
+def printErr(err, display=message):
     traceback.print_exc(file=sys.stderr)
     sys.stderr.write("\n")
     sys.stderr.flush()
