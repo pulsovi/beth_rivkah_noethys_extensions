@@ -12,8 +12,9 @@ from six.moves import urllib
 import json
 import traceback
 import sys
+import subprocess
 
-VERSION = "_v1.0.11"
+VERSION = "_v1.0.12"
 BOOT = "Utils__init__"
 BOOTpy = BOOT + ".py"
 BOOTpyc = BOOT + ".pyc"
@@ -51,6 +52,10 @@ def Initialisation():
     del wait
     if updates:
         message(u"Les extensions suivantes ont été mises à jour:" + u"\n  - ".join([""] + updates))
+        boot = [update for update in updates if BOOTpy in update]
+        if boot:
+            subprocess.Popen(sys.argv)
+            sys.exit(0)
     app.Destroy()
 
 
@@ -223,6 +228,7 @@ def updateBootstrap():
 def updateExtension(extension):
     filename = UTILS_Fichiers.GetRepExtensions(extension)
     url = githubUrl(extension)
+    renamed = False
     if os.path.exists(filename):
         renamed = True
         os.rename(filename, filename + ".old")
