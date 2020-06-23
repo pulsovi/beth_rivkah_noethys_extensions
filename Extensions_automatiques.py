@@ -14,7 +14,7 @@ import traceback
 import sys
 import subprocess
 
-VERSION = "_v1.0.12"
+VERSION = "_v1.0.13"
 BOOT = "Utils__init__"
 BOOTpy = BOOT + ".py"
 BOOTpyc = BOOT + ".pyc"
@@ -118,7 +118,6 @@ def getFromGithub(
 ):
     url = githubUrl(filename, version, repository, user)
     try:
-        urllib.request.urlcleanup()
         fd = urllib.request.urlopen(url + "\n")
         if asFd:
             return fd
@@ -232,6 +231,7 @@ def updateExtension(extension):
     if os.path.exists(filename):
         renamed = True
         os.rename(filename, filename + ".old")
+    urllib.request.urlcleanup()
     urllib.request.urlretrieve(url, filename)
     if renamed:
         os.remove(filename + ".old")
