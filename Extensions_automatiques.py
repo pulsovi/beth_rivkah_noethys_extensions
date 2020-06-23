@@ -13,7 +13,10 @@ import json
 import traceback
 import sys
 
-VERSION = "_v1.0.10"
+VERSION = "_v1.0.11"
+BOOT = "Utils__init__"
+BOOTpy = BOOT + ".py"
+BOOTpyc = BOOT + ".pyc"
 officialVersionsCache = None
 
 
@@ -21,9 +24,9 @@ def Extension():
     wait = wx.BusyInfo(u"Verifications en cours, merci de patienter…")
     text = ""
     try:
-        bootstrapVersion = getOfficialVersion("Utils__init__.py")
-        uptodate = hasModule("Utils__init__" + bootstrapVersion)
-        updated = hasModule("Utils__init__" + bootstrapVersion + u" installée")
+        bootstrapVersion = getOfficialVersion(BOOTpy)
+        uptodate = hasModule(BOOT + bootstrapVersion)
+        updated = hasModule(BOOT + bootstrapVersion + u" installée")
 
         if uptodate:
             text = u"Extension installée et activée."
@@ -31,7 +34,7 @@ def Extension():
             text = u"L'extension est installée. Merci de redémarrer Noethys pour l'activer"
         else:
             updateBootstrap()
-            addModule("Utils__init__" + bootstrapVersion + u" installée")
+            addModule(BOOT + bootstrapVersion + u" installée")
             text = (u"L'installation s'est correctement déroulée."
                 u" Il est necessaire de redémarrer Noethys pour l'activer.")
     except Exception as err:
@@ -54,18 +57,18 @@ def Initialisation():
 def UpdateAll():
     updates = []
     try:
-        officialBootstrapVersion = getOfficialVersion("Utils__init__.py")
-        if not hasModule("Utils__init__" + officialBootstrapVersion):
+        officialBootstrapVersion = getOfficialVersion(BOOTpy)
+        if not hasModule(BOOT + officialBootstrapVersion):
             if not hasattr(Data, "extensionsAutomatiques"):
                 oldVersion = ""
             else:
                 for extension in Data.extensionsAutomatiques:
-                    if extension.startswith("Utils__init__"):
+                    if extension.startswith(BOOT):
                         oldVersion = extension.split("_v")[1]
             updateBootstrap()
-            updates.append("Utils__init__.py " + oldVersion + " > " + officialBootstrapVersion)
+            updates.append(BOOTpy + " " + oldVersion + " > " + officialBootstrapVersion)
         for extension, version in officialVersionsCache.iteritems():
-            if extension == "Utils__init__.py":
+            if extension == BOOTpy:
                 continue
             currentVersion = getFileVersion(extension) or ""
             # if currentVersion is None: update
@@ -197,7 +200,7 @@ def printErr(err, display=message):
 
 
 def updateBootstrap():
-    customUtilInit = getFromGithub("Utils__init__.pyc")
+    customUtilInit = getFromGithub(BOOTpyc)
     noezip = os.path.realpath(os.path.join(UTILS_Fichiers.__file__, "..", ".."))
     tempzip = os.path.join(UTILS_Fichiers.GetRepTemp(), "sortie.zip")
     if os.path.isfile(tempzip):
