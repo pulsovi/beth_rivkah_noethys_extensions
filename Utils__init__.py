@@ -9,11 +9,11 @@ import Data
 import traceback
 from six.moves import reload_module
 
-VERSION = "_v1.2.3"
+VERSION = "_v1.2.4"
 
 
 def getFileList():
-    # Récupére la liste des fichiers et met Extensions_automatiques en premier
+    # Récupére la liste des fichiers
     fichiers = os.listdir(UTILS_Fichiers.GetRepExtensions())
     fichiers.sort()
     return fichiers
@@ -53,7 +53,8 @@ fichiers = getFileList()
 if mainFile in fichiers:
     mainModule = launch(mainFile)
     fichiers = getFileList()
-    reload_module(mainModule)
+    if mainModule:
+        reload_module(mainModule)
 for fichier in fichiers:
     launch(fichier)
 
