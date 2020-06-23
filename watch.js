@@ -43,6 +43,7 @@ function handleChange(file) {
   ];
   const toIgnore = [
     ".git",
+    ".gitignore",
     "anomalies.sql",
     "Appliquer_tarifs_convenus.py",
     "Debug_extensions.py",
