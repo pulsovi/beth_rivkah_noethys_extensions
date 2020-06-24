@@ -1,23 +1,29 @@
 # coding: utf8
 
-import zipfile
+# exposes:
+#     classes: DB
+#     functions: addModule, getQuery, hasModule, message
+import json
 import os
 import shutil
+import subprocess
+import sys
+import traceback
+import zipfile
+
+from six.moves import urllib
 import wx
-from Utils import UTILS_Fichiers
+
 import Data
+from Utils import UTILS_Fichiers
 import FonctionsPerso
 import GestionDB
-from six.moves import urllib
-import json
-import traceback
-import sys
-import subprocess
 
-VERSION = "_v1.0.13"
+VERSION = "_v1.1.0"
 BOOT = "Utils__init__"
 BOOTpy = BOOT + ".py"
 BOOTpyc = BOOT + ".pyc"
+
 officialVersionsCache = None
 
 
@@ -236,3 +242,16 @@ def updateExtension(extension):
     if renamed:
         os.remove(filename + ".old")
     return True
+
+
+class DB(GestionDB.DB, object):
+    def __init__(self):
+        super(DB, self).__init__()
+
+    def GetQuery(self, query):
+        success = self.ExecuterReq(query)
+        response = self.ResultatReq()
+        return response, success
+
+    def GetResponse(self, query):
+        return self.GetQuery(query)[0]
