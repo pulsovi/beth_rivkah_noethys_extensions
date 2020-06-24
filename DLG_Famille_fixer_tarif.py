@@ -10,7 +10,7 @@ from Extensions_automatiques import message, addModule, hasModule, getQuery
 from CTRL_Famille_outils import Ajouter as AjouterOutil
 from DLG_Famille_evaluer_mensualite import EvaluerMensualite
 
-VERSION = "_v1.0.2"
+VERSION = "_v1.0.3"
 
 
 def Extension():
@@ -50,7 +50,7 @@ def MenuFixerTarif(self, event):
 
     # calculer le nouveau quotient et récupérer le quotient actif
     IDactivite, nom, date_debut, date_fin = activite
-    famille, enfants, brut = EvaluerMensualite(self.IDfamille, IDactivite)
+    famille, enfants, brut = EvaluerMensualite(self.IDfamille, IDactivite)[:3]
     quotient = int(round(montant / brut))
     quotientActif = GetQuotientActif(self.IDfamille, date_debut, date_fin)
 
