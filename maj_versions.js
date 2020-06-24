@@ -79,7 +79,8 @@ async function main() {
     }
   });
 
-  fs.writeFile("./versions.json", JSON.stringify(versions, null, 2), "utf8", err => {
+  const stringifiedVersions = JSON.stringify(versions).slice(1, -1).split(",").sort().join(",\n  ");
+  fs.writeFile("./versions.json", `{\n  ${stringifiedVersions}\n}`, "utf8", err => {
     if (err) {
       console.log(err);
       process.exit(1);
