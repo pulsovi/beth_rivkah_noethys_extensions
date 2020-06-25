@@ -7,20 +7,19 @@ import importlib
 import wx
 import Data
 import traceback
-from six.moves import reload_module
 
-VERSION = "_v1.2.4"
+VERSION = "_v1.2.5"
 
 
 def getFileList():
-    # Récupére la liste des fichiers
+    """Récupére la liste des fichiers d'extensions"""
     fichiers = os.listdir(UTILS_Fichiers.GetRepExtensions())
     fichiers.sort()
     return fichiers
 
 
 def launch(fichier):
-    # Execute les Initialisation des extensions et collecte les erreurs
+    """Execute les Initialisation des extensions et collecte les erreurs"""
     if not fichier.endswith(ext):
         return
     nomFichier = os.path.split(fichier)[1]
@@ -40,9 +39,9 @@ def launch(fichier):
         sys.stderr.write("\n")
 
 
-# Ajoute la version du bootstrap dans le repertoire des extensions chargées
+# Ajouter la version du bootstrap dans le repertoire des extensions chargées
 Data.extensionsAutomatiques = ["Utils__init__" + VERSION]
-# Ajoute le repertoire des extensions au PATH
+# Ajouter le repertoire des extensions au PATH
 sys.path.append(UTILS_Fichiers.GetRepExtensions())
 
 ext = "py"
@@ -52,13 +51,15 @@ listeErreurs = {}
 fichiers = getFileList()
 if mainFile in fichiers:
     mainModule = launch(mainFile)
+    # Recharger la liste, des extensions ont pu être installées ou suprimées
     fichiers = getFileList()
-    if mainModule:
-        reload_module(mainModule)
+    # inutile de rééxecuter Extensions_automatiques,
+    # l'extension redémarre Noethys en cas de MAJ d'elle même
+    fichiers = [fichier for fichier in fichiers if fichier != mainFile]
 for fichier in fichiers:
     launch(fichier)
 
-# Affiche les erreurs
+# Afficher les erreurs
 if listeErreurs:
     app = wx.App()
     for erreur, fichiersErreur in listeErreurs.iteritems():

@@ -19,7 +19,7 @@ from Utils import UTILS_Fichiers
 import FonctionsPerso
 import GestionDB
 
-VERSION = "_v1.1.0"
+VERSION = "_v1.1.1"
 BOOT = "Utils__init__"
 BOOTpy = BOOT + ".py"
 BOOTpyc = BOOT + ".pyc"
@@ -58,8 +58,8 @@ def Initialisation():
     del wait
     if updates:
         message(u"Les extensions suivantes ont été mises à jour:" + u"\n  - ".join([""] + updates))
-        boot = [update for update in updates if BOOTpy in update]
-        if boot:
+        bootOrUpdater = [update for update in updates if BOOTpy in update or __name__ in update]
+        if bootOrUpdater:
             subprocess.Popen(sys.argv)
             sys.exit(0)
     app.Destroy()
