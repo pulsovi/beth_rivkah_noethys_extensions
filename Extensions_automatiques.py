@@ -19,7 +19,7 @@ from Utils import UTILS_Fichiers
 import FonctionsPerso
 import GestionDB
 
-VERSION = "_v1.1.1"
+VERSION = "_v1.2.0"
 BOOT = "Utils__init__"
 BOOTpy = BOOT + ".py"
 BOOTpyc = BOOT + ".pyc"
@@ -91,7 +91,7 @@ def UpdateAll():
         traceback.print_exc(file=sys.stderr)
         sys.stderr.write("\n")
         sys.stderr.flush()
-        message(str(err))
+        message(str(err), "Erreur", wx.OK | wx.ICON_ERROR)
     finally:
         return updates
 
@@ -190,12 +190,12 @@ def hasModule(moduleName):
     return moduleName in Data.extensionsAutomatiques
 
 
-def message(text, title=u"Information"):
+def message(text, title=u"Information", style=wx.OK | wx.ICON_INFORMATION):
     dlg = wx.MessageDialog(
         parent=None,
         message=text,
         caption=title,
-        style=wx.OK | wx.ICON_INFORMATION
+        style=style
     )
     dlg.ShowModal()
     dlg.Destroy()
