@@ -1,16 +1,23 @@
 # coding: utf8
 
-
-from Dlg import DLG_Famille
-from Extensions_automatiques import message, addModule, hasModule, getQuery
-from Utils import UTILS_Adaptations
-from Utils.UTILS_Traduction import _
+# exposes:
+#     classes: CTRL_ANNEE, UpdateQuestionnaire
+#     functions: Ajouter, GetQuestionnaireValeurs
+#     constants: FAMILLE, INDIVIDU
 from collections import OrderedDict
-import Chemins
+
 import wx
 
+from Dlg import DLG_Famille
+from Utils import UTILS_Adaptations
+from Utils.UTILS_Traduction import _
+import Chemins
 
-VERSION = "_v1.2.3"
+from Extensions_automatiques import message, addModule, hasModule, getQuery, DB
+
+VERSION = "_v1.3.0"
+FAMILLE = 0
+INDIVIDU = 1
 
 
 list_outils = OrderedDict([
@@ -151,3 +158,91 @@ def GetQuestionnaireValeurs(IDfamille):
         }
 
     return reponsesQuestionnaire
+
+
+class UpdateQuestionnaire(DB):
+    def __init__(self):
+        super(UpdateQuestionnaire, self).__init__()
+        self.values = []
+
+    def AddValue(self, IDquestion, IDprop, reponse, type=FAMILLE):
+        IDreponseSQL = self.GetResponse("""
+            SELECT `IDreponse`
+            FROM `questionnaire_reponses`
+            WHERE `IDquestion`={IDquestion} AND {propCol}={IDprop}
+        """.format(
+            IDquestion=IDquestion,
+            propCol="IDfamille" if type == FAMILLE else "IDindividu",
+            IDprop=IDprop
+        ))
+        IDreponse = IDreponseSQL[0][0] if IDreponseSQL else "NULL"
+        self.values.append("({}, {}, {}, {}, {})".format(
+            IDreponse,
+            IDquestion,
+            IDprop if type == INDIVIDU else "NULL",
+            IDprop if type == FAMILLE else "NULL",
+            reponse
+        ))
+
+    def Execute(self):
+        response, success = self.GetQuery("""
+            INSERT INTO `questionnaire_reponses`
+            (`IDreponse`, `IDquestion`, `IDindividu`, `IDfamille`, `reponse`)
+            VALUES {values}
+            ON DUPLICATE KEY UPDATE
+                `reponse`=VALUES(`reponse`);
+        """.format(values=",".join(self.values)))
+        if success:
+            self.values = []
+        return response, success
+
+
+class CTRL_ANNEE(wx.Choice):
+    def __init__(self, parent, db, label=u"Sélectionnez l'année scolaire."):
+        super(CTRL_ANNEE, self).__init__(parent, -1, choices=[])
+        self.parent = parent
+        if not isinstance(db, UpdateQuestionnaire):
+            raise TypeError(u"db must be instance of UpdateQuestionnaire")
+        self.db = db
+        self.SetToolTip(wx.ToolTip(label))
+        self.MAJ()
+
+    def MAJ(self):
+        listeItems = self.GetListeDonnees()
+        if len(listeItems) == 0:
+            self.Enable(False)
+        self.SetItems(listeItems)
+
+    def GetAnnee(self):
+        index = self.GetSelection()
+        if index == -1:
+            return None
+        return self.dictDonnees[index]
+
+    def GetListeDonnees(self):
+        req = """SELECT IDactivite, nom, date_debut, date_fin FROM activites ORDER BY nom;"""
+        listeDonnees = self.db.GetResponse(req)
+        self.dictDonnees = {}
+        listeNoms = []
+        index = 0
+        for activite in listeDonnees:
+            IDactivite, nom, date_debut, date_fin = activite
+            listeNoms.append(activite[1])
+            self.dictDonnees[index] = activite
+            index += 1
+        return listeNoms
+
+    def SetID(self, ID=0):
+        if ID is None:
+            return
+        for index, values in self.dictDonnees.items():
+            if values[0] == ID:
+                self.SetSelection(index)
+
+    def GetID(self):
+        index = self.GetSelection()
+        if index == -1:
+            return None
+        if index == 0:
+            return None
+        return self.dictDonnees[index][0]
