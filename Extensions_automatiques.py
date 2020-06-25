@@ -19,7 +19,7 @@ from Utils import UTILS_Fichiers
 import FonctionsPerso
 import GestionDB
 
-VERSION = "_v1.2.0"
+VERSION = "_v1.3.0"
 BOOT = "Utils__init__"
 BOOTpy = BOOT + ".py"
 BOOTpyc = BOOT + ".pyc"
@@ -197,8 +197,9 @@ def message(text, title=u"Information", style=wx.OK | wx.ICON_INFORMATION):
         caption=title,
         style=style
     )
-    dlg.ShowModal()
+    response = dlg.ShowModal()
     dlg.Destroy()
+    return response
 
 
 def printErr(err, display=message):
