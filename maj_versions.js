@@ -9,6 +9,7 @@ const extensions = [
   "DLG_Famille_evaluer_mensualite.py",
   "DLG_Famille_fixer_tarif.py",
   "DLG_Famille_maj_resultats_calcules.py",
+  "DLG_Liste_inscriptions.py",
   "Extensions_automatiques.py",
   "Mensualite_base.py",
   "Utils__init__.py",
