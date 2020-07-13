@@ -15,7 +15,7 @@ import Chemins
 
 from Extensions_automatiques import message, addModule, hasModule, getQuery, DB
 
-VERSION = "_v1.3.0"
+VERSION = "_v1.3.1"
 FAMILLE = 0
 INDIVIDU = 1
 
@@ -202,7 +202,7 @@ class CTRL_ANNEE(wx.Choice):
         super(CTRL_ANNEE, self).__init__(parent, -1, choices=[])
         self.parent = parent
         if not isinstance(db, UpdateQuestionnaire):
-            raise TypeError(u"db must be instance of UpdateQuestionnaire")
+            raise TypeError(u"db must be instance of UpdateQuestionnaire " + str(db) + " given")
         self.db = db
         self.SetToolTip(wx.ToolTip(label))
         self.MAJ()
