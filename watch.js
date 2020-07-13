@@ -60,7 +60,7 @@ function handleChange(file) {
   const toSend = [
     "Calcul_totaux_infos_financ.py",
     "CTRL_Famille_outils.py",
-    "Debug.py",
+    "Debug_SQL.py",
     "DLG_Famille_evaluer_mensualite.py",
     "DLG_Famille_fixer_tarif.py",
     "DLG_Famille_maj_resultats_calcules.py",
