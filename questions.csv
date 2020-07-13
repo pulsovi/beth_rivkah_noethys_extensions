@@ -38,3 +38,5 @@ IDquestion  type        c.label                     q.label
 29          famille     Divers                      Statut du dossier d'inscription
 30          famille     Résultats calculés          Montant de mensualité estimé (après réduction)
 31          individu    Résultats calculés          Montant de mensualité estimé (après réduction)
+32          famille     Divers                      Enfants inscrits en crèche
+33          famille     Divers                      Enfants inscrits en JDE
