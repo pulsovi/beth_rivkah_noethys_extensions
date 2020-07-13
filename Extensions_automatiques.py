@@ -2,7 +2,7 @@
 
 # exposes:
 #     classes: DB
-#     functions: addModule, getQuery, hasModule, message
+#     functions: addModule, deprecate, getQuery, hasModule, message, printErr
 import json
 import os
 import shutil
@@ -19,7 +19,7 @@ from Utils import UTILS_Fichiers
 import FonctionsPerso
 import GestionDB
 
-VERSION = "_v1.3.0"
+VERSION = "_v1.4.0"
 BOOT = "Utils__init__"
 BOOTpy = BOOT + ".py"
 BOOTpyc = BOOT + ".pyc"
@@ -100,6 +100,14 @@ def addModule(moduleName):
     if not hasattr(Data, "extensionsAutomatiques"):
         Data.extensionsAutomatiques = []
     Data.extensionsAutomatiques.append(moduleName)
+
+
+def deprecate(text="Deprecated function"):
+    sys.stderr.write(text)
+    sys.stderr.write("\n")
+    traceback.print_stack(file=sys.stderr)
+    sys.stderr.write("\n")
+    sys.stderr.flush()
 
 
 def getFileVersion(filename):
