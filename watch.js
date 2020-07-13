@@ -1,6 +1,7 @@
 const beep = require('beepbeep');
 const fs = require('fs');
 const path = require('path');
+const { promisify } = require('util');
 const destinationFolder = "C:\\Users\\DHG\\AppData\\Roaming\\noethys\\Extensions";
 const { fork, exec } = require('child_process');
 const timeouts = [];
@@ -162,7 +163,17 @@ async function restartNoethys() {
   while (!retval)
     retval = await waitForProcess(exec('TASKKILL /T /F /IM Noethys.exe'));
   await sleep(200);
+  await clearNoethysLog();
   exec('C:\\Noethys\\Noethys.exe')
+}
+
+function clearNoethysLog() {
+  return new Promise((resolve, reject) => {
+    fs.truncate('C:\\Noethys\\Noethys.exe.log', err => {
+      if (err) reject(err);
+      resolve();
+    });
+  });
 }
 
 function sleep(delay) {
