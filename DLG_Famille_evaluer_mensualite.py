@@ -13,7 +13,7 @@ from Utils.UTILS_Traduction import _
 from Extensions_automatiques import message, addModule, hasModule, deprecate
 from CTRL_Famille_outils import Ajouter as AjouterOutil, UpdateQuestionnaire, CTRL_ANNEE
 
-VERSION = "_v2.1.0"
+VERSION = "_v2.1.1"
 
 
 QID = {
@@ -92,6 +92,9 @@ def EvaluerMensualite(IDfamille, IDactivite):
 
 class Inscriptions(UpdateQuestionnaire):
     def EvaluerMensualite(self, IDfamille, IDactivite):
+        """Returns tuple: (brut, mensualites, coeffBR, coeffDeg, enfants)
+        enfants is array of tuples like: (IDindividu, prenom, taux)
+        """
         nb, inscriptions, mensualites, coeffBR, coeffDeg = self.GetInscriptions(
             IDfamille, IDactivite)
         filteredList = filter(self.FiltrerListe, inscriptions)
