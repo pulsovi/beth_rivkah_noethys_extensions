@@ -1,8 +1,9 @@
 # coding:utf8
+import wx
+
 from Dlg import DLG_Famille
 from Utils import UTILS_Utilisateurs
 import GestionDB
-import wx
 
 
 def Extension():

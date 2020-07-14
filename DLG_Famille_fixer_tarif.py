@@ -1,4 +1,17 @@
 # coding: utf8
+"""
+Le coefficient et les tarifs obeissent à ces équations
+- Tarif activité = tarif annuel BR ÷ 1 000 000
+- Brut = tarif activite
+- Quotient = tarif annuel fixé ÷ tarif activite ÷ mensualites
+- Quotient = tarif mensuel fixé ÷ tarif activite
+- Tarif payé mensuellement = Quotient × tarif activite
+- Pour une famille au tarif standard, le quotient vaut 1 000 000 ÷ mensualites
+"""
+
+
+# exposes:
+#     Extension and Initialisation only
 
 from Ctrl import CTRL_Bouton_image, CTRL_Saisie_euros
 from datetime import date
@@ -6,11 +19,11 @@ from Dlg import DLG_Famille, DLG_Saisie_quotient
 from Utils.UTILS_Traduction import _
 import wx
 
-from Extensions_automatiques import message, addModule, hasModule, getQuery
-from CTRL_Famille_outils import Ajouter as AjouterOutil
-from DLG_Famille_evaluer_mensualite import EvaluerMensualite
+from Extensions_automatiques import message, addModule, hasModule
+from CTRL_Famille_outils import Ajouter as AjouterOutil, CTRL_ANNEE
+from DLG_Famille_evaluer_mensualite import Inscriptions
 
-VERSION = "_v1.0.3"
+VERSION = "_v1.0.5"
 
 
 def Extension():
@@ -34,12 +47,16 @@ def Initialisation():
 
 
 def DoLayout(self):
+    """Agrandit le cadre Observations dans la saisie de quotient"""
     self.ctrl_observations.SetMinSize((-1, 100))
     self.NoethysDoLayout()
 
 
 def MenuFixerTarif(self, event):
-    dlg = Dialog(None)
+    inscriptions = Inscriptions()
+
+    # recuperer la saisie utilisateur
+    dlg = Dialog(None, db=inscriptions)
     dlg.ShowModal()
     activite = dlg.GetAnnee()
     montant = dlg.GetMontant()
@@ -50,9 +67,11 @@ def MenuFixerTarif(self, event):
 
     # calculer le nouveau quotient et récupérer le quotient actif
     IDactivite, nom, date_debut, date_fin = activite
-    famille, enfants, brut = EvaluerMensualite(self.IDfamille, IDactivite)[:3]
+
+    brut, mensualites, coeffBR, coeffDeg, enfants = inscriptions.EvaluerMensualite(
+        self.IDfamille, IDactivite)
     quotient = int(round(montant / brut))
-    quotientActif = GetQuotientActif(self.IDfamille, date_debut, date_fin)
+    quotientActif = GetQuotientActif(inscriptions, self.IDfamille, date_debut, date_fin)
 
     # pas de redondances
     if quotientActif and quotient == int(quotientActif[4]):
@@ -72,9 +91,9 @@ def MenuFixerTarif(self, event):
 
     # nouveau quotient en BDD
     observations = u"""Pour une mensualite totale de {montant}€ :""".format(montant=montant)
-    for id, prenom, mnt, taux in enfants:
+    for id, prenom, taux in enfants:
         observations += u"\\n - {prenom}: {montant}".format(
-            prenom=prenom, montant=round(montant * mnt / famille, 2))
+            prenom=prenom, montant=round(montant * taux / brut, 2))
     values += u"""
     (NULL, {IDfamille}, '{date_debut}', '{date_fin}', {quotient}, "{observations}", NULL, 1)
     """.format(
@@ -102,7 +121,8 @@ def MenuFixerTarif(self, event):
     ON DUPLICATE KEY UPDATE
         `date_fin`=VALUES(`date_fin`)
     """.format(values=values)
-    getQuery(query)
+    inscriptions.ExecuterReq(query)
+    inscriptions.Close()
     message(u"""Le montant a été fixé.
 Merci de consulter le volet QF/Revenus pour vérifier la période d'application.""")
     OuvrirQF(self)
@@ -114,7 +134,7 @@ def OuvrirQF(self):
     notebook.MAJpage("quotients")
 
 
-def GetQuotientActif(IDfamille, debut, fin):
+def GetQuotientActif(DB, IDfamille, debut, fin):
     query = """
     SELECT
         *
@@ -129,20 +149,20 @@ def GetQuotientActif(IDfamille, debut, fin):
         )
     LIMIT 1
     """.format(IDfamille=IDfamille, debut=date.today(), fin=fin)
-    resultats = getQuery(query)
+    resultats = DB.GetResponse(query)
     if resultats:
         return resultats[0]
     return None
 
 
 class Dialog(wx.Dialog):
-    def __init__(self, parent, id=-1, title=_(u"Choix année scolaire")):
+    def __init__(self, parent, id=-1, title=_(u"Choix année scolaire"), db=None):
         wx.Dialog.__init__(self, parent, id, title, name="DLG_annee_montant")
         self.parent = parent
         self.staticbox = wx.StaticBox(self, -1, "")
         self.label = wx.StaticText(self, -1, _(u"Veuillez choisir l'année et saisir le montant."))
         self.label_annee = wx.StaticText(self, -1, _(u"Année scolaire :"))
-        self.ctrl_annee = CTRL_ANNEE(self)
+        self.ctrl_annee = CTRL_ANNEE(self, db=db)
         self.label_montant = wx.StaticText(self, -1, _(u"Montant :"))
         self.ctrl_montant = CTRL_Saisie_euros.CTRL(self)
         self.bouton_ok = CTRL_Bouton_image.CTRL(
@@ -194,51 +214,3 @@ class Dialog(wx.Dialog):
 
     def GetMontant(self):
         return self.ctrl_montant.GetMontant()
-
-
-class CTRL_ANNEE(wx.Choice):
-    def __init__(self, parent):
-        wx.Choice.__init__(self, parent, -1, choices=[])
-        self.parent = parent
-        self.SetToolTip(wx.ToolTip(_(u"Sélectionnez l'année scolaire.")))
-        self.MAJ()
-
-    def MAJ(self):
-        listeItems = self.GetListeDonnees()
-        if len(listeItems) == 0:
-            self.Enable(False)
-        self.SetItems(listeItems)
-
-    def GetAnnee(self):
-        index = self.GetSelection()
-        if index == -1:
-            return None
-        return self.dictDonnees[index]
-
-    def GetListeDonnees(self):
-        req = """SELECT IDactivite, nom, date_debut, date_fin FROM activites ORDER BY nom;"""
-        listeDonnees = getQuery(req)
-        self.dictDonnees = {}
-        listeNoms = []
-        index = 0
-        for activite in listeDonnees:
-            IDactivite, nom, date_debut, date_fin = activite
-            listeNoms.append(nom)
-            self.dictDonnees[index] = activite
-            index += 1
-        return listeNoms
-
-    def SetID(self, ID=0):
-        if ID is None:
-            return
-        for index, values in self.dictDonnees.items():
-            if values[0] == ID:
-                self.SetSelection(index)
-
-    def GetID(self):
-        index = self.GetSelection()
-        if index == -1:
-            return None
-        if index == 0:
-            return None
-        return self.dictDonnees[index][0]

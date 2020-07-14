@@ -19,12 +19,13 @@ from Utils import UTILS_Fichiers
 import FonctionsPerso
 import GestionDB
 
-VERSION = "_v1.4.0"
+VERSION = "_v1.4.2"
 BOOT = "Utils__init__"
 BOOTpy = BOOT + ".py"
 BOOTpyc = BOOT + ".pyc"
 
 officialVersionsCache = None
+DEV = False
 
 
 def Extension():
@@ -130,6 +131,11 @@ def getFromGithub(
     user="pulsovi",
     asFd=False
 ):
+    if DEV:
+        fd = open(os.path.join(DEV, filename), "rb")
+        content = fd.read()
+        fd.close()
+        return content
     url = githubUrl(filename, version, repository, user)
     try:
         fd = urllib.request.urlopen(url + "\n")
@@ -161,6 +167,8 @@ def getOfficialVersion(filename, noethysVersion=FonctionsPerso.GetVersionLogicie
 def getOfficialVersions(noethysVersion):
     global officialVersionsCache
     jsonString = getFromGithub("versions.json", noethysVersion)
+    if DEV:
+        sys.stderr.write("\nOFFICIAL VERSIONS\n" + jsonString + "\n")
     if jsonString is None:
         return None
     dictVersions = json.loads(jsonString)
@@ -210,12 +218,12 @@ def message(text, title=u"Information", style=wx.OK | wx.ICON_INFORMATION):
     return response
 
 
-def printErr(err, display=message):
+def printErr(errMsg=None, callback=message):
     traceback.print_exc(file=sys.stderr)
     sys.stderr.write("\n")
     sys.stderr.flush()
-    if callable(display):
-        display(str(err))
+    if errMsg and callable(callback):
+        callback(str(errMsg))
 
 
 def updateBootstrap():
@@ -241,6 +249,13 @@ def updateBootstrap():
 
 def updateExtension(extension):
     filename = UTILS_Fichiers.GetRepExtensions(extension)
+    if DEV:
+        content = subprocess.check_output(
+            ["git", "cat-file", "--textconv", "--", "HEAD:" + extension], cwd=DEV)
+        fd = open(filename, "w")
+        fd.write(content)
+        fd.close()
+        return True
     url = githubUrl(extension)
     renamed = False
     if os.path.exists(filename):

@@ -1,11 +1,13 @@
 # coding: utf8
-from Dlg import DLG_Famille
-from Dlg import DLG_Famille_questionnaire
-from Extensions_automatiques import message, hasModule, addModule, getQuery
-from CTRL_Famille_outils import Ajouter as AjouterOutil, GetQuestionnaireValeurs
 import wx
 
-VERSION = "_v1.0.4"
+from Dlg import DLG_Famille
+from Dlg import DLG_Famille_questionnaire
+
+from CTRL_Famille_outils import Ajouter as AjouterOutil, GetQuestionnaireValeurs
+from Extensions_automatiques import message, hasModule, addModule, getQuery
+
+VERSION = "_v1.0.5"
 
 
 def Extension():

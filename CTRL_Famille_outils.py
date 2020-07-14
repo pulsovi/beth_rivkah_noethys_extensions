@@ -15,7 +15,7 @@ import Chemins
 
 from Extensions_automatiques import message, addModule, hasModule, getQuery, DB
 
-VERSION = "_v1.3.0"
+VERSION = "_v1.4.0"
 FAMILLE = 0
 INDIVIDU = 1
 
@@ -165,22 +165,25 @@ class UpdateQuestionnaire(DB):
         super(UpdateQuestionnaire, self).__init__()
         self.values = []
 
-    def AddValue(self, IDquestion, IDprop, reponse, type=FAMILLE):
-        IDreponseSQL = self.GetResponse("""
-            SELECT `IDreponse`
-            FROM `questionnaire_reponses`
-            WHERE `IDquestion`={IDquestion} AND {propCol}={IDprop}
-        """.format(
-            IDquestion=IDquestion,
-            propCol="IDfamille" if type == FAMILLE else "IDindividu",
-            IDprop=IDprop
-        ))
-        IDreponse = IDreponseSQL[0][0] if IDreponseSQL else "NULL"
+    def AddValue(self, IDquestion, IDdestinataire, reponse, type=FAMILLE, IDligne=None):
+        if IDligne is None:
+            IDreponseSQL = self.GetResponse("""
+                SELECT `IDreponse`
+                FROM `questionnaire_reponses`
+                WHERE `IDquestion`={IDquestion} AND {propCol}={IDdestinataire}
+            """.format(
+                IDquestion=IDquestion,
+                propCol="IDfamille" if type == FAMILLE else "IDindividu",
+                IDdestinataire=IDdestinataire
+            ))
+            IDreponse = IDreponseSQL[0][0] if IDreponseSQL else "NULL"
+        else:
+            IDreponse = IDligne
         self.values.append("({}, {}, {}, {}, {})".format(
             IDreponse,
             IDquestion,
-            IDprop if type == INDIVIDU else "NULL",
-            IDprop if type == FAMILLE else "NULL",
+            IDdestinataire if type == INDIVIDU else "NULL",
+            IDdestinataire if type == FAMILLE else "NULL",
             reponse
         ))
 
@@ -198,11 +201,11 @@ class UpdateQuestionnaire(DB):
 
 
 class CTRL_ANNEE(wx.Choice):
-    def __init__(self, parent, db, label=u"Sélectionnez l'année scolaire."):
+    def __init__(self, parent, db=None, label=u"Sélectionnez l'année scolaire."):
         super(CTRL_ANNEE, self).__init__(parent, -1, choices=[])
         self.parent = parent
-        if not isinstance(db, UpdateQuestionnaire):
-            raise TypeError(u"db must be instance of UpdateQuestionnaire")
+        if db is not None and not isinstance(db, UpdateQuestionnaire):
+            raise TypeError(u"db must be instance of UpdateQuestionnaire " + str(db) + " given")
         self.db = db
         self.SetToolTip(wx.ToolTip(label))
         self.MAJ()
@@ -221,7 +224,10 @@ class CTRL_ANNEE(wx.Choice):
 
     def GetListeDonnees(self):
         req = """SELECT IDactivite, nom, date_debut, date_fin FROM activites ORDER BY nom;"""
-        listeDonnees = self.db.GetResponse(req)
+        if self.db is None:
+            listeDonnees = getQuery(req)
+        else:
+            listeDonnees = self.db.GetResponse(req)
         self.dictDonnees = {}
         listeNoms = []
         index = 0
