@@ -3,3 +3,4 @@ TODOS.txt
 config.json
 !Utils__init__.pyc
 *.pyc
+Debug_Consommations.log

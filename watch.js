@@ -61,6 +61,7 @@ function handleChange(file) {
   const toSend = [
     "ext_Calcul_totaux_infos_financ.py",
     "ext_CTRL_Famille_outils.py",
+    "ext_Debug_Consommations.py",
     "ext_Debug_SQL.py",
     "ext_DLG_Famille_evaluer_mensualite.py",
     "ext_DLG_Famille_fixer_tarif.py",
@@ -77,6 +78,7 @@ function handleChange(file) {
     "Appliquer_tarifs_convenus.py",
     "config.json",
     "config.json.dist",
+    "Debug_Consommations.log",
     "Debug_extensions.py",
     "divers.py",
     "Exporter_anomalies.py",
