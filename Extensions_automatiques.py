@@ -19,7 +19,7 @@ from Utils import UTILS_Fichiers
 import FonctionsPerso
 import GestionDB
 
-VERSION = "_v1.4.1"
+VERSION = "_v1.4.2"
 BOOT = "Utils__init__"
 BOOTpy = BOOT + ".py"
 BOOTpyc = BOOT + ".pyc"
@@ -218,12 +218,12 @@ def message(text, title=u"Information", style=wx.OK | wx.ICON_INFORMATION):
     return response
 
 
-def printErr(err, display=message):
+def printErr(errMsg=None, callback=message):
     traceback.print_exc(file=sys.stderr)
     sys.stderr.write("\n")
     sys.stderr.flush()
-    if callable(display):
-        display(str(err))
+    if errMsg and callable(callback):
+        callback(str(errMsg))
 
 
 def updateBootstrap():

@@ -1,4 +1,14 @@
 # coding: utf8
+"""
+Le coefficient et les tarifs obeissent à ces équations
+- Tarif activité = tarif annuel BR ÷ 1 000 000
+- Brut = tarif activite
+- Quotient = tarif annuel fixé ÷ tarif activite ÷ mensualites
+- Quotient = tarif mensuel fixé ÷ tarif activite
+- Tarif payé mensuellement = Quotient × tarif activite
+- Pour une famille au tarif standard, le quotient vaut 1 000 000 ÷ mensualites
+"""
+
 
 # exposes:
 #     Extension and Initialisation only
@@ -13,7 +23,7 @@ from Extensions_automatiques import message, addModule, hasModule
 from CTRL_Famille_outils import Ajouter as AjouterOutil, CTRL_ANNEE
 from DLG_Famille_evaluer_mensualite import Inscriptions
 
-VERSION = "_v1.0.4"
+VERSION = "_v1.0.5"
 
 
 def Extension():

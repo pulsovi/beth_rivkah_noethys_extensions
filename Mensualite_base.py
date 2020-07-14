@@ -1,12 +1,17 @@
 # coding: utf8
+"""
+Met a jour les réponses de questionnaire :
+- individu / Résultats calculés / Montant de mensualité estimé (avant réduction)
+- famille / Résultats calculés / Montant de mensualité estimé (avant réduction) / Montant fixé
+"""
 
 import wx
 
-from Extensions_automatiques import getQuery, message
-from DLG_Famille_evaluer_mensualite import EvaluerMensualite, GetActivite
+from Extensions_automatiques import getQuery, message, printErr
+from CTRL_Famille_outils import FAMILLE, INDIVIDU
+from DLG_Famille_evaluer_mensualite import Inscriptions, GetActivite
 
-
-VERSION = "_v1.0.0"
+VERSION = "_v1.0.1"
 
 
 def Extension():
@@ -14,17 +19,14 @@ def Extension():
 
 
 def MajMensualiteBase():
-    """
-    Met a jour les réponses de questionnaire :
-    - TODO individu / Résultats calculés / Montant de mensualité estimé (avant réduction)
-    - famille / Résultats calculés / Montant de mensualité estimé (avant réduction)
-    """
-    activite = GetActivite()
+    inscriptions = Inscriptions()
+
+    activite = GetActivite(db=inscriptions)
     if activite is None:
         return
     IDactivite = activite[0]
 
-    familles = getQuery("SELECT `IDfamille` FROM `familles`")
+    familles = inscriptions.GetResponse("SELECT `IDfamille` FROM `familles`")
 
     total = len(familles)
     current = 0
@@ -32,7 +34,8 @@ def MajMensualiteBase():
         title=u"Mise à jour des tarifs de base …",
         message=u"{current}/{total}".format(current=current, total=total),
         maximum=total,
-        style=wx.PD_APP_MODAL | wx.PD_SMOOTH | wx.PD_CAN_SKIP | wx.PD_REMAINING_TIME | wx.PD_AUTO_HIDE
+        style=wx.PD_APP_MODAL | wx.PD_SMOOTH | wx.PD_CAN_SKIP |
+        wx.PD_REMAINING_TIME | wx.PD_AUTO_HIDE
     )
 
     for IDfamille, in familles:
@@ -45,21 +48,25 @@ def MajMensualiteBase():
             progress.Destroy()
             return
 
-        reponses = getQuery("""
-        SELECT `IDreponse`
-        FROM `questionnaire_reponses`
-        WHERE
-            `IDquestion`=19
-            AND
-            `IDfamille`={IDfamille}
-        """.format(IDfamille=IDfamille))
-        IDreponse = None if not reponses else reponses[0][0]
-
         try:
-            base = EvaluerMensualite(IDfamille, IDactivite)[0]
+            brut, mensualites, coeffBr, coeffDeg, enfants = inscriptions.EvaluerMensualite(
+                IDfamille, IDactivite)
+            quotient = inscriptions.GetQuotient(IDfamille, IDactivite)
+            coeff = coeffBr * coeffDeg
+            inscriptions.AddValue(19, IDfamille, inscriptions.CalculateTaux(brut, mensualites))
+            inscriptions.AddValue(30, IDfamille,
+                inscriptions.CalculateTaux(brut, mensualites, coeff))
+            if quotient is not None:
+                inscriptions.AddValue(20, IDfamille, round(brut * quotient[4], 2))
+            for id, prenom, taux in enfants:
+                inscriptions.AddValue(25, id,
+                    inscriptions.CalculateTaux(taux, mensualites), INDIVIDU)
+                inscriptions.AddValue(31, id,
+                    inscriptions.CalculateTaux(taux, mensualites, coeff), INDIVIDU)
+            inscriptions.Execute()
         except Exception:
             progress.Destroy()
-            message(u"Erreur avec la famille" + str(getQuery("""
+            printErr(u"Erreur avec la famille" + str(getQuery("""
             SELECT `nom`, `prenom`
             FROM `rattachements`
             LEFT JOIN `individus` USING(`IDindividu`)
@@ -67,18 +74,45 @@ def MajMensualiteBase():
             """.format(IDfamille=IDfamille))))
             return
 
-        if IDreponse:
-            getQuery("""
-            UPDATE `questionnaire_reponses`
-            SET `reponse`={base}
-            WHERE `IDreponse`={IDreponse}
-            """.format(base=base, IDreponse=IDreponse))
-        else:
-            getQuery("""
-            INSERT INTO `questionnaire_reponses`
-                (`IDquestion`, `IDfamille`, `reponse`)
-            VALUES (19, {IDfamille}, {base})
-            """.format(IDfamille=IDfamille, base=base))
-
     progress.Destroy()
     message(u"La procédure s'est terminée avec succés.", u"Fin")
+
+
+def updateFamille(IDfamille, reponse):
+    updateReponse(IDfamille, reponse, FAMILLE)
+
+
+def updateIndividu(IDfamille, reponse):
+    updateReponse(IDfamille, reponse, INDIVIDU)
+
+
+def updateReponse(ID, reponse, type=FAMILLE):
+    idstring = "IDfamille" if type == FAMILLE else "IDindividu"
+    IDquestion = 19 if type == FAMILLE else 25
+    reponses = getQuery("""
+    SELECT `IDreponse`
+    FROM `questionnaire_reponses`
+    WHERE
+        `IDquestion`={IDquestion}
+        AND
+        `{idstring}`={ID}
+    """.format(ID=ID, IDquestion=IDquestion, idstring=idstring))
+    IDreponse = None if not reponses else reponses[0][0]
+
+    if IDreponse:
+        getQuery("""
+        UPDATE `questionnaire_reponses`
+        SET `reponse`={reponse}
+        WHERE `IDreponse`={IDreponse}
+        """.format(reponse=reponse, IDreponse=IDreponse))
+    else:
+        getQuery("""
+        INSERT INTO `questionnaire_reponses`
+            (`IDquestion`, `{idstring}`, `reponse`)
+        VALUES ({IDquestion}, {ID}, {reponse})
+        """.format(
+            ID=ID,
+            reponse=reponse,
+            IDquestion=IDquestion,
+            idstring=idstring
+        ))

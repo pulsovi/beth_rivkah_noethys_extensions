@@ -13,7 +13,7 @@ from Utils.UTILS_Traduction import _
 from Extensions_automatiques import message, addModule, hasModule, deprecate
 from CTRL_Famille_outils import Ajouter as AjouterOutil, UpdateQuestionnaire, CTRL_ANNEE
 
-VERSION = "_v2.1.1"
+VERSION = "_v2.2.0"
 
 
 QID = {
@@ -201,6 +201,23 @@ class Inscriptions(UpdateQuestionnaire):
             reponses[question] = reponse
 
         return reponses
+
+    def GetQuotient(self, IDfamille, IDactivite):
+        query = """
+        SELECT *
+        FROM
+            `quotients`
+            JOIN `activites` ON (
+                `activites`.`date_debut`<=`quotients`.`date_debut`
+                AND `activites`.`date_fin`>=`quotients`.`date_fin`
+            )
+        WHERE
+            `activites`.`IDactivite`={IDactivite}
+            AND `quotients`.`IDfamille`={IDfamille}
+        LIMIT 1
+        """.format(IDfamille=IDfamille, IDactivite=IDactivite)
+        response = self.GetResponse(query)
+        return response[0] if response else None
 
     def ValidateList(self, nb, list):
         if len(list) != nb:
