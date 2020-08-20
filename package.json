@@ -1,0 +1,15 @@
+{
+  "name": "noethys_extensions",
+  "version": "1.0.0",
+  "main": "watch.js",
+  "repository": "git@github.com:pulsovi/beth_rivkah_noethys_extensions.git",
+  "scripts": {
+    "start": "node watch.js"
+  },
+  "author": "David GABISON <david.gabison@outlook.com>",
+  "license": "MIT",
+  "dependencies": {
+    "beepbeep": "^1.3.0",
+    "winreg": "^1.2.4"
+  }
+}
