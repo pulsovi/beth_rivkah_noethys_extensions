@@ -1,4 +1,6 @@
 # coding: utf8
+import datetime
+
 import wx
 
 from Ctrl import CTRL_Bouton_image
@@ -10,12 +12,11 @@ from Ol import OL_Liste_inscriptions
 from Utils import UTILS_Infos_individus, UTILS_Questionnaires
 from Utils import UTILS_Titulaires
 from Utils.UTILS_Traduction import _
-import datetime
 import GestionDB
 
 from Extensions_automatiques import addModule
 
-VERSION = "_v1.0.0"
+VERSION = "_v1.1.0"
 
 
 def Extension():
@@ -26,6 +27,17 @@ def Initialisation():
     OL_Liste_inscriptions.ListView.InitModel = InitModel
     OL_Liste_inscriptions.ListView.MAJ = MAJ
     DLG_Liste_inscriptions.Parametres = Parametres
+    OL_Liste_inscriptions.LISTE_CHAMPS.append({
+        "label": _(u"ID de la famille"),
+        "code": "IDfamille",
+        "champ": "inscriptions.IDfamille",
+        "typeDonnee": "entier",
+        "align": "left",
+        "largeur": 65,
+        "stringConverter": None,
+        "actif": True,
+        "afficher": True
+    })
     addModule(__name__ + VERSION)
 
 
