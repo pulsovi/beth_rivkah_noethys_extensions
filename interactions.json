@@ -1,0 +1,36 @@
+{
+  "Chemins": [
+    "CTRL_Famille_outils.py"
+  ],
+  "Ctrl/CTRL_Bouton_image": [
+    "DLG_Famille_evaluer_mensualite.py",
+    "DLG_Famille_fixer_tarif.py"
+  ],
+  "Ctrl/CTRL_Saisie_euros": [
+    "DLG_Famille_fixer_tarif.py"
+  ],
+  "Dlg/DLG_Famille" : [
+    "CTRL_Famille_outils.py",
+    "DLG_Famille_evaluer_mensualite.py"
+    "DLG_Famille_fixer_tarif.py",
+    "DLG_Famille_maj_resultats_calcules.py",
+  ],
+  "Dlg/DLG_Famille_questionnaire": [
+    "DLG_Famille_maj_resultats_calcules.py"
+  ],
+  "Dlg/DLG_Saisie_quotient": [
+    "DLG_Famille_fixer_tarif.py"
+  ],
+  "GestionDB": [
+    "Appliquer_tarifs_convenus.py",
+    "Calcul_totaux_infos_financ.py"
+  ],
+  "Utils.UTILS_Adaptations": [
+    "CTRL_Famille_outils.py"
+  ],
+  "Utils.UTILS_Traduction": [
+    "CTRL_Famille_outils.py",
+    "DLG_Famille_evaluer_mensualite.py",
+    "DLG_Famille_fixer_tarif.py"
+  ]
+}
