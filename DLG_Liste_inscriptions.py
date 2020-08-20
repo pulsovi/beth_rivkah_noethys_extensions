@@ -16,7 +16,7 @@ import GestionDB
 
 from Extensions_automatiques import addModule
 
-VERSION = "_v1.1.0"
+VERSION = "_v1.1.1"
 
 
 def Extension():
@@ -24,9 +24,24 @@ def Extension():
 
 
 def Initialisation():
+    AddDateRef()
+    AddIDfamille()
+    addModule(__name__ + VERSION)
+
+
+def AddDateRef():
+    '''
+    Ajoute le champs "Date de reference" dans les paramètres
+    '''
     OL_Liste_inscriptions.ListView.InitModel = InitModel
     OL_Liste_inscriptions.ListView.MAJ = MAJ
     DLG_Liste_inscriptions.Parametres = Parametres
+
+
+def AddIDfamille():
+    '''
+    Ajoute IDfamille dans la liste des colonnes disponibles
+    '''
     OL_Liste_inscriptions.LISTE_CHAMPS.append({
         "label": _(u"ID de la famille"),
         "code": "IDfamille",
@@ -38,9 +53,11 @@ def Initialisation():
         "actif": True,
         "afficher": True
     })
-    addModule(__name__ + VERSION)
 
 
+##############
+# AddDateRef #
+##############
 def InitModel(self, date_reference=datetime.date.today()):
     # Initialisation des questionnaires
     categorie = "inscription"
