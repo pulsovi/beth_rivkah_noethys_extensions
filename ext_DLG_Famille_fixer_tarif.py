@@ -19,11 +19,11 @@ from Dlg import DLG_Famille, DLG_Saisie_quotient
 from Utils.UTILS_Traduction import _
 import wx
 
-from Extensions_automatiques import message, addModule, hasModule
-from CTRL_Famille_outils import Ajouter as AjouterOutil, CTRL_ANNEE
-from DLG_Famille_evaluer_mensualite import Inscriptions
+from ext_Extensions_automatiques import message, addModule, hasModule
+from ext_CTRL_Famille_outils import Ajouter as AjouterOutil, CTRL_ANNEE
+from ext_DLG_Famille_evaluer_mensualite import Inscriptions
 
-VERSION = "_v1.0.5"
+VERSION = "_v2.0.0"
 
 
 def Extension():

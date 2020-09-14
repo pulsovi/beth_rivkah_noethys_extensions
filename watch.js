@@ -59,16 +59,16 @@ function watch() {
 function handleChange(file) {
   //console.log(`change ${file}`);
   const toSend = [
-    "Calcul_totaux_infos_financ.py",
-    "CTRL_Famille_outils.py",
-    "Debug_SQL.py",
-    "DLG_Famille_evaluer_mensualite.py",
-    "DLG_Famille_fixer_tarif.py",
-    "DLG_Famille_maj_resultats_calcules.py",
-    "DLG_Liste_inscriptions.py",
-    "Extensions_automatiques.py",
-    "Preparer_Export.py",
-    "Tests.py",
+    "ext_Calcul_totaux_infos_financ.py",
+    "ext_CTRL_Famille_outils.py",
+    "ext_Debug_SQL.py",
+    "ext_DLG_Famille_evaluer_mensualite.py",
+    "ext_DLG_Famille_fixer_tarif.py",
+    "ext_DLG_Famille_maj_resultats_calcules.py",
+    "ext_DLG_Liste_inscriptions.py",
+    "ext_Extensions_automatiques.py",
+    "ext_Preparer_Export.py",
+    "ext_Tests.py",
   ];
   const toIgnore = [
     ".git",

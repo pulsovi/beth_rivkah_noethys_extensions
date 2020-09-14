@@ -19,7 +19,7 @@ from Utils import UTILS_Fichiers
 import FonctionsPerso
 import GestionDB
 
-VERSION = "_v1.4.3"
+VERSION = "_v2.0.0"
 BOOT = "Utils__init__"
 BOOTpy = BOOT + ".py"
 BOOTpyc = BOOT + ".pyc"

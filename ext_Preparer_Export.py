@@ -7,11 +7,11 @@ Met a jour les réponses de questionnaire :
 
 import wx
 
-from Extensions_automatiques import getQuery, message, printErr
-from CTRL_Famille_outils import FAMILLE, INDIVIDU
-from DLG_Famille_evaluer_mensualite import Inscriptions, GetActivite
+from ext_Extensions_automatiques import getQuery, message, printErr
+from ext_CTRL_Famille_outils import FAMILLE, INDIVIDU
+from ext_DLG_Famille_evaluer_mensualite import Inscriptions, GetActivite
 
-VERSION = "_v1.0.1"
+VERSION = "_v2.0.0"
 
 
 def Extension():
@@ -34,8 +34,7 @@ def MajMensualiteBase():
         title=u"Mise à jour des tarifs de base …",
         message=u"{current}/{total}".format(current=current, total=total),
         maximum=total,
-        style=wx.PD_APP_MODAL | wx.PD_SMOOTH | wx.PD_CAN_SKIP |
-        wx.PD_REMAINING_TIME | wx.PD_AUTO_HIDE
+        style=wx.PD_APP_MODAL | wx.PD_SMOOTH | wx.PD_CAN_SKIP | wx.PD_REMAINING_TIME | wx.PD_AUTO_HIDE
     )
 
     for IDfamille, in familles:

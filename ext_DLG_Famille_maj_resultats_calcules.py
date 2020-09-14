@@ -4,10 +4,10 @@ import wx
 from Dlg import DLG_Famille
 from Dlg import DLG_Famille_questionnaire
 
-from CTRL_Famille_outils import Ajouter as AjouterOutil, GetQuestionnaireValeurs
-from Extensions_automatiques import message, hasModule, addModule, getQuery
+from ext_CTRL_Famille_outils import Ajouter as AjouterOutil, GetQuestionnaireValeurs
+from ext_Extensions_automatiques import message, hasModule, addModule, getQuery
 
-VERSION = "_v1.0.5"
+VERSION = "_v2.0.0"
 
 
 def Extension():

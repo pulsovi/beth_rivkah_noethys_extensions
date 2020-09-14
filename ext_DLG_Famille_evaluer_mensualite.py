@@ -10,10 +10,10 @@ from Ctrl import CTRL_Bouton_image
 from Dlg import DLG_Famille
 from Utils.UTILS_Traduction import _
 
-from Extensions_automatiques import message, addModule, hasModule, deprecate
-from CTRL_Famille_outils import Ajouter as AjouterOutil, UpdateQuestionnaire, CTRL_ANNEE
+from ext_Extensions_automatiques import message, addModule, hasModule, deprecate
+from ext_CTRL_Famille_outils import Ajouter as AjouterOutil, UpdateQuestionnaire, CTRL_ANNEE
 
-VERSION = "_v2.2.0"
+VERSION = "_v3.0.0"
 
 
 QID = {

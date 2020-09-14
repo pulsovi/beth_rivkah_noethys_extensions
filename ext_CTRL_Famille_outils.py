@@ -13,9 +13,9 @@ from Utils import UTILS_Adaptations
 from Utils.UTILS_Traduction import _
 import Chemins
 
-from Extensions_automatiques import message, addModule, hasModule, getQuery, DB
+from ext_Extensions_automatiques import message, addModule, hasModule, getQuery, DB
 
-VERSION = "_v1.4.0"
+VERSION = "_v2.0.0"
 FAMILLE = 0
 INDIVIDU = 1
 

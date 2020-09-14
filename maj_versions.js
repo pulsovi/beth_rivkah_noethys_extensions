@@ -4,6 +4,18 @@ const { promisify } = require("util");
 
 
 const extensions = [
+  "ext_Calcul_totaux_infos_financ.py",
+  "ext_CTRL_Famille_outils.py",
+  "ext_DLG_Famille_evaluer_mensualite.py",
+  "ext_DLG_Famille_fixer_tarif.py",
+  "ext_DLG_Famille_maj_resultats_calcules.py",
+  "ext_DLG_Liste_inscriptions.py",
+  "ext_Extensions_automatiques.py",
+  "ext_Preparer_Export.py",
+  "Utils__init__.py",
+];
+
+const deleted = [
   "Calcul_totaux_infos_financ.py",
   "CTRL_Famille_outils.py",
   "DLG_Famille_evaluer_mensualite.py",
@@ -11,12 +23,8 @@ const extensions = [
   "DLG_Famille_maj_resultats_calcules.py",
   "DLG_Liste_inscriptions.py",
   "Extensions_automatiques.py",
-  "Preparer_Export.py",
-  "Utils__init__.py",
-];
-
-const deleted = [
   "Mensualite_base.py",
+  "Preparer_Export.py",
 ];
 
 const commit_content = child_process.execSync("git status --porcelain").toString().split("\n");

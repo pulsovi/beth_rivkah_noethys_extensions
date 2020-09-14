@@ -14,13 +14,17 @@ from Utils import UTILS_Titulaires
 from Utils.UTILS_Traduction import _
 import GestionDB
 
-from Extensions_automatiques import addModule
+from ext_Extensions_automatiques import addModule, message, hasModule
 
-VERSION = "_v1.1.1"
+VERSION = "_v2.0.0"
 
 
 def Extension():
-    pass
+    if not hasModule(__name__ + VERSION):
+        message(u"L'extension est correctement installée, "
+            u"merci de redémarrer Noethys pour l'activer.")
+        return
+    message(u"Extension installée et activée.", __name__ + VERSION)
 
 
 def Initialisation():

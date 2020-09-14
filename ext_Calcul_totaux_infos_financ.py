@@ -2,7 +2,7 @@
 import GestionDB
 import wx
 
-VERSION = "_v2.0.0"
+VERSION = "_v3.0.0"
 
 
 def Extension():

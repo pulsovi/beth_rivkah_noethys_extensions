@@ -8,7 +8,7 @@ import wx
 import Data
 import traceback
 
-VERSION = "_v1.2.5"
+VERSION = "_v2.0.0"
 
 
 def getFileList():
@@ -45,7 +45,7 @@ Data.extensionsAutomatiques = ["Utils__init__" + VERSION]
 sys.path.append(UTILS_Fichiers.GetRepExtensions())
 
 ext = "py"
-mainFile = "Extensions_automatiques.py"
+mainFile = "ext_Extensions_automatiques.py"
 listeErreurs = {}
 
 fichiers = getFileList()

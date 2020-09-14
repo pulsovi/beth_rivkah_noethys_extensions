@@ -2,7 +2,7 @@
 import GestionDB
 from Utils.UTILS_Traduction import _
 
-from Extensions_automatiques import addModule, hasModule, message
+from ext_Extensions_automatiques import addModule, hasModule, message
 
 VERSION = "_v0.0.0"
 
