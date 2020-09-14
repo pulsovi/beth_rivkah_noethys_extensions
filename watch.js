@@ -7,6 +7,7 @@ const { fork, exec } = require('child_process');
 const timeouts = [];
 const child_process = require("child_process");
 const Registry = require("winreg");
+const { pythonPath } = require("./config.json");
 
 const Reset = "\x1b[0m";
 const Bright = "\x1b[1m";
@@ -80,6 +81,7 @@ function handleChange(file) {
     "Exporter_anomalies.py",
     "inscription nouvelle annee.sql",
     "maj_versions.js",
+    "node_modules",
     "questions.csv",
     "reset extensions auto.sh",
     "TODOS.txt",
@@ -93,7 +95,7 @@ function handleChange(file) {
   }
   if (file === "Utils__init__.py") {
     child_process.exec(
-      "\"C:\\Program Files\\Python27\\python.exe\" -m compileall -f Utils__init__.py",
+      `"${pythonPath}" -m compileall -f Utils__init__.py`,
       err => console.log("Utils/__init__.pyc compiled", {err})
     );
     return;
