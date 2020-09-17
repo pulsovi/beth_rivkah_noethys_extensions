@@ -11,7 +11,7 @@ from ext_Extensions_automatiques import getQuery, message, printErr
 from ext_CTRL_Famille_outils import FAMILLE, INDIVIDU
 from ext_DLG_Famille_evaluer_mensualite import Inscriptions, GetActivite
 
-VERSION = "_v2.0.0"
+VERSION = "_v2.1.0"
 
 
 def Extension():
@@ -67,6 +67,9 @@ def MajMensualiteBase():
                 # mensualité estimée après réductions
                 inscriptions.AddValue(31, id,
                     inscriptions.CalculateTaux(taux, mensualites, coeff), INDIVIDU)
+                if quotient is not None:
+                    # mensualité fixée
+                    inscriptions.AddValue(42, id, round(taux * quotient[4], 2), INDIVIDU)
             inscriptions.Execute()
         except Exception:
             progress.Destroy()

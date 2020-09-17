@@ -31,12 +31,13 @@ IDquestion  type        c.label                     q.label
 21          famille     Convenu                     Nombre de mensualités annuelles
 23          famille     Divers                      Enfants à charge
 24          famille     Divers                      Enfants inscrits à Beth Rivkah
-25          individu    Résultats calculés          Montant de mensualité estimé (avant réduction)
+25          individu    Résultats calculés          IND. Montant de mensualité estimé (avant réduction)
 26          individu    Résultats calculés          Département
 27          individu    Renseignements              régime
 28          individu    Résultats calculés          Latalmid (reduc>70%)
 29          famille     Divers                      Statut du dossier d'inscription
 30          famille     Résultats calculés          Montant de mensualité estimé (après réduction)
-31          individu    Résultats calculés          Montant de mensualité estimé (après réduction)
+31          individu    Résultats calculés          IND. Montant de mensualité estimé (après réduction)
 32          famille     Divers                      Enfants inscrits en crèche
 33          famille     Divers                      Enfants inscrits en JDE
+42          individu    Résultats calculés          IND. Montant mensualité fixé
