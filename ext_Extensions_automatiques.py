@@ -19,11 +19,12 @@ from Utils import UTILS_Fichiers
 import FonctionsPerso
 import GestionDB
 
-VERSION = "_v2.0.0"
+VERSION = "_v2.0.1"
 BOOT = "Utils__init__"
 BOOTpy = BOOT + ".py"
 BOOTpyc = BOOT + ".pyc"
 
+repositoryBranch = None
 officialVersionsCache = None
 DEV = False
 
@@ -32,6 +33,7 @@ def Extension():
     wait = wx.BusyInfo(u"Verifications en cours, merci de patienter…")
     text = ""
     try:
+        setRepositoryBranch()
         bootstrapVersion = getOfficialVersion(BOOTpy)
         uptodate = hasModule(BOOT + bootstrapVersion)
         updated = hasModule(BOOT + bootstrapVersion + u" installée")
@@ -55,6 +57,7 @@ def Extension():
 def Initialisation():
     app = wx.App()
     wait = wx.BusyInfo(u"Mise à jour des extensions en cours, merci de patienter…")
+    setRepositoryBranch()
     updates = UpdateAll()
     del wait
     if updates:
@@ -138,7 +141,7 @@ def getFileVersion(filename):
 
 def getFromGithub(
     filename,
-    version=FonctionsPerso.GetVersionLogiciel(),
+    version=repositoryBranch,
     repository="beth_rivkah_noethys_extensions",
     user="pulsovi",
     asFd=False
@@ -166,7 +169,9 @@ def getFromGithub(
         return None
 
 
-def getOfficialVersion(filename, noethysVersion=FonctionsPerso.GetVersionLogiciel()):
+def getOfficialVersion(filename, noethysVersion=None):
+    if noethysVersion is None:
+        noethysVersion = repositoryBranch
     if officialVersionsCache is not None:
         if filename in officialVersionsCache:
             return officialVersionsCache[filename]
@@ -197,10 +202,12 @@ def getQuery(query):
 
 def githubUrl(
     filename,
-    version=FonctionsPerso.GetVersionLogiciel(),
+    version=None,
     repository="beth_rivkah_noethys_extensions",
     user="pulsovi",
 ):
+    if version is None:
+        version = repositoryBranch
     basename = u"https://raw.githubusercontent.com"
     url = u"{basename}/{user}/{repository}/{version}/{filename}".format(
         basename=basename,
@@ -236,6 +243,15 @@ def printErr(errMsg=None, callback=message):
     sys.stderr.flush()
     if errMsg and callable(callback):
         callback(str(errMsg))
+
+
+def setRepositoryBranch():
+    global repositoryBranch
+    noethysVersion = FonctionsPerso.GetVersionLogiciel()
+    if getFromGithub("versions.json", noethysVersion) is None:
+        repositoryBranch = "master"
+    else:
+        repositoryBranch = noethysVersion
 
 
 def updateBootstrap():
