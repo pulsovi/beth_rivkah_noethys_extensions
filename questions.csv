@@ -9,14 +9,14 @@ join questionnaire_categories as c USING(IDcategorie)
 
 IDquestion  type        c.label                     q.label
 1           famille     Divers                      Parents intervenants Beth Rivkah
-2           famille     Revenus mensuels parent 1   Salaire
-3           famille     Revenus mensuels parent 1   Allocation chômage
-4           famille     Revenus mensuels parent 1   CAF
-5           famille     Revenus mensuels parent 1   Autre revenus
-6           famille     Revenus mensuels parent 2   Salaire
-7           famille     Revenus mensuels parent 2   Allocation chômage
-8           famille     Revenus mensuels parent 2   CAF
-9           famille     Revenus mensuels parent 2   Autre revenus
+2           famille     Revenus mensuels parent 1   PAR1. Salaire
+3           famille     Revenus mensuels parent 1   PAR1. Allocation chômage
+4           famille     Revenus mensuels parent 1   PAR1. CAF
+5           famille     Revenus mensuels parent 1   PAR1. Autre revenus
+6           famille     Revenus mensuels parent 2   PAR2. Salaire
+7           famille     Revenus mensuels parent 2   PAR2. Allocation chômage
+8           famille     Revenus mensuels parent 2   PAR2. CAF
+9           famille     Revenus mensuels parent 2   PAR2. Autre revenus
 10          famille     Charges mensuelles          Loyer
 11          famille     Charges mensuelles          Crédit immobilier
 12          famille     Charges mensuelles          Charges
@@ -26,8 +26,8 @@ IDquestion  type        c.label                     q.label
 16          famille     Résultats calculés          Total revenus mensuels famille
 17          famille     Résultats calculés          Total charges mensuelles
 18          famille     Résultats calculés          RAV (Reste à vivre)
-19          famille     Résultats calculés          Montant de mensualité estimé (avant réduction)
-20          famille     Convenu                     Montant mensualité fixé
+19          famille     Résultats calculés          FAM. Montant de mensualité estimé (avant réduction)
+20          famille     Convenu                     FAM. Montant mensualité fixé
 21          famille     Convenu                     Nombre de mensualités annuelles
 23          famille     Divers                      Enfants à charge
 24          famille     Divers                      Enfants inscrits à Beth Rivkah
@@ -36,7 +36,7 @@ IDquestion  type        c.label                     q.label
 27          individu    Renseignements              régime
 28          individu    Résultats calculés          Latalmid (reduc>70%)
 29          famille     Divers                      Statut du dossier d'inscription
-30          famille     Résultats calculés          Montant de mensualité estimé (après réduction)
+30          famille     Résultats calculés          FAM. Montant de mensualité estimé (après réduction)
 31          individu    Résultats calculés          IND. Montant de mensualité estimé (après réduction)
 32          famille     Divers                      Enfants inscrits en crèche
 33          famille     Divers                      Enfants inscrits en JDE
