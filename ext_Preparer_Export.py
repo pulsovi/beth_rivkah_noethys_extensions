@@ -11,7 +11,7 @@ from ext_Extensions_automatiques import getQuery, message, printErr
 from ext_CTRL_Famille_outils import FAMILLE, INDIVIDU
 from ext_DLG_Famille_evaluer_mensualite import Inscriptions, GetActivite
 
-VERSION = "_v2.1.0"
+VERSION = "_v2.2.0"
 
 
 def Extension():
@@ -54,6 +54,12 @@ def MajMensualiteBase():
             coeff = coeffBr * coeffDeg
             # mensualité estimée avant réductions
             inscriptions.AddValue(19, IDfamille, inscriptions.CalculateTaux(brut, mensualites))
+            # coefficient de réduction "Intervenant BR"
+            inscriptions.AddValue(43, IDfamille, coeffBr)
+            # coefficient de réduction "Tarif dégressif"
+            inscriptions.AddValue(44, IDfamille, coeffDeg)
+            # coefficient de réduction global
+            inscriptions.AddValue(45, IDfamille, coeff)
             # mensualité estimée après réductions
             inscriptions.AddValue(30, IDfamille,
                 inscriptions.CalculateTaux(brut, mensualites, coeff))

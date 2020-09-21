@@ -41,3 +41,6 @@ IDquestion  type        c.label                     q.label
 32          famille     Divers                      Enfants inscrits en crèche
 33          famille     Divers                      Enfants inscrits en JDE
 42          individu    Résultats calculés          IND. Montant mensualité fixé
+43          famille     Résultats calculés          Taux de réduction "Intervenant BR"
+44          famille     Résultats calculés          Taux de réduction "Tarif dégressif"
+45          famille     Résultats calculés          Taux de réduction global
