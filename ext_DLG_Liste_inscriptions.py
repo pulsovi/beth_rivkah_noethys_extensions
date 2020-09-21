@@ -16,7 +16,7 @@ import GestionDB
 
 from ext_Extensions_automatiques import addModule, message, hasModule
 
-VERSION = "_v2.0.0"
+VERSION = "_v2.0.1"
 
 
 def Extension():
@@ -30,6 +30,7 @@ def Extension():
 def Initialisation():
     AddDateRef()
     AddIDfamille()
+    FixDecimalDisplay()
     addModule(__name__ + VERSION)
 
 
@@ -57,6 +58,13 @@ def AddIDfamille():
         "actif": True,
         "afficher": True
     })
+
+
+def FixDecimalDisplay():
+    '''
+    Fixe le bug d'affichage des questions au format decimal
+    '''
+    UTILS_Questionnaires.Questionnaires.FormatageReponse = FormatageReponse
 
 
 ##############
@@ -309,3 +317,36 @@ class Parametres(wx.Panel):
 
         labelParametres = " | ".join(listeParametres)
         return labelParametres
+
+#####################
+# FixDecimalDisplay #
+#####################
+def FormatageReponse(self, reponse="", controle=""):
+    filtre = self.GetFiltre(controle)
+    texteReponse = u""
+    if filtre == "texte" : texteReponse = reponse
+    if filtre == "entier" : texteReponse = int(reponse)
+    if filtre == "montant" : texteReponse = float(reponse)#decimal.Decimal(reponse)
+    if filtre == "choix" :
+        if reponse != None :
+            if type(reponse) == int:
+                listeTemp = [reponse,]
+            else:
+                listeTemp = reponse.split(";")
+            listeTemp2 = []
+            for IDchoix in listeTemp :
+                try :
+                    IDchoix = int(IDchoix)
+                    if IDchoix in self.dictChoix :
+                        listeTemp2.append(self.dictChoix[IDchoix])
+                except :
+                    pass
+            texteReponse = ", ".join(listeTemp2)
+    if filtre == "coche" :
+        if reponse in (1, "1") :
+            texteReponse = _(u"Oui")
+        else :
+            texteReponse = _(u"Non")
+    if filtre == "date" : texteReponse = DateEngEnDateDD(reponse)
+    if filtre == "decimal" : texteReponse = reponse
+    return texteReponse
