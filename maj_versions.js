@@ -1,6 +1,7 @@
 const fs = require('fs');
 const child_process = require("child_process");
 const { promisify } = require("util");
+const { sublimePath } = require("./config");
 
 
 const extensions = [
@@ -84,7 +85,7 @@ async function main() {
     if (isModified(filename) && oldVersions[filename] === versions[filename]) {
       console.log(`${filename} est modifié mais le numéro de version n'a pas évolué`);
       child_process.spawn(
-        "D:\\usr\\local\\bin\\sublime-text.bat",
+        sublimePath,
         [`${filename}:${lines[filename]}`],
         { detached: true, stdio: "ignore", }
       ).unref();

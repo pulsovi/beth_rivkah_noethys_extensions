@@ -75,6 +75,8 @@ function handleChange(file) {
     ".gitignore",
     "anomalies.sql",
     "Appliquer_tarifs_convenus.py",
+    "config.json",
+    "config.json.dist",
     "Debug_extensions.py",
     "divers.py",
     "Exporter_anomalies.py",
