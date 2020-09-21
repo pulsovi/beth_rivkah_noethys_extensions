@@ -3,11 +3,10 @@ const fs = require('fs');
 const path = require('path');
 const { promisify } = require('util');
 const destinationFolder = "C:\\Users\\DHG\\AppData\\Roaming\\noethys\\Extensions";
-const { fork, exec } = require('child_process');
 const timeouts = [];
-const child_process = require("child_process");
+const { fork, exec } = require("child_process");
 const Registry = require("winreg");
-const { pythonPath } = require("./config.json");
+const { noethysPath, pythonPath } = require("./config.json");
 
 const Reset = "\x1b[0m";
 const Bright = "\x1b[1m";
@@ -88,13 +87,13 @@ function handleChange(file) {
     "Utils__init__.pyc",
     "versions.json",
   ];
-  if (file === "watch.js") {
+  if (file === "watch.js" || file === "config.json") {
     console.log("exit child");
     process.exit();
     return;
   }
   if (file === "Utils__init__.py") {
-    child_process.exec(
+    exec(
       `"${pythonPath}" -m compileall -f Utils__init__.py`,
       err => console.log("Utils/__init__.pyc compiled", {err})
     );
@@ -127,7 +126,7 @@ async function performRestartAHK() {
       resolve(path.join(item.value, "AutoHotkeyU64.exe"));
     })
   });
-  child_process.exec(`"${ahkExePath}" "${ahkPath}"`, err => {
+  exec(`"${ahkExePath}" "${ahkPath}"`, err => {
     if (err) console.log("AHK reload error:\n", err);
   });
 }
@@ -166,7 +165,7 @@ async function restartNoethys() {
     retval = await waitForProcess(exec('TASKKILL /T /F /IM Noethys.exe'));
   await sleep(200);
   await clearNoethysLog();
-  exec('C:\\Noethys\\Noethys.exe')
+  exec('Noethys.exe', { cwd: noethysPath })
 }
 
 function clearNoethysLog() {
