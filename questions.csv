@@ -1,4 +1,4 @@
-﻿select
+select
 q.IDquestion,
 c.type,
 c.label,
@@ -44,3 +44,4 @@ IDquestion  type        c.label                     q.label
 43          famille     Résultats calculés          Taux de réduction "Intervenant BR"
 44          famille     Résultats calculés          Taux de réduction "Tarif dégressif"
 45          famille     Résultats calculés          Taux de réduction global
+46          famille     Export                      Compte client
