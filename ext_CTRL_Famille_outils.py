@@ -15,7 +15,7 @@ import Chemins
 
 from ext_Extensions_automatiques import message, addModule, hasModule, getQuery, DB
 
-VERSION = "_v2.0.0"
+VERSION = "_v2.1.0"
 FAMILLE = 0
 INDIVIDU = 1
 
@@ -160,6 +160,10 @@ def GetQuestionnaireValeurs(IDfamille):
     return reponsesQuestionnaire
 
 
+def isString(value):
+    return unicode(value) == value
+
+
 class UpdateQuestionnaire(DB):
     def __init__(self):
         super(UpdateQuestionnaire, self).__init__()
@@ -179,12 +183,15 @@ class UpdateQuestionnaire(DB):
             IDreponse = IDreponseSQL[0][0] if IDreponseSQL else "NULL"
         else:
             IDreponse = IDligne
+
+        resp = u'"' + reponse + '"' if isString(reponse) else reponse
+
         self.values.append("({}, {}, {}, {}, {})".format(
             IDreponse,
             IDquestion,
             IDdestinataire if type == INDIVIDU else "NULL",
             IDdestinataire if type == FAMILLE else "NULL",
-            reponse
+            resp
         ))
 
     def Execute(self):
