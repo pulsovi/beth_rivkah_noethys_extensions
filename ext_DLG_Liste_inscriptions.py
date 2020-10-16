@@ -9,14 +9,13 @@ from Ctrl import CTRL_Saisie_date
 from Dlg import DLG_Liste_inscriptions
 from Dlg import DLG_Selection_activite
 from Ol import OL_Liste_inscriptions
-from Utils import UTILS_Infos_individus, UTILS_Questionnaires
-from Utils import UTILS_Titulaires
+from Utils import UTILS_Infos_individus, UTILS_Questionnaires, UTILS_Titulaires
 from Utils.UTILS_Traduction import _
 import GestionDB
 
 from ext_Extensions_automatiques import addModule, message, hasModule
 
-VERSION = "_v2.0.1"
+VERSION = "_v2.0.2"
 
 
 def Extension():
@@ -318,35 +317,41 @@ class Parametres(wx.Panel):
         labelParametres = " | ".join(listeParametres)
         return labelParametres
 
+
 #####################
 # FixDecimalDisplay #
 #####################
 def FormatageReponse(self, reponse="", controle=""):
     filtre = self.GetFiltre(controle)
     texteReponse = u""
-    if filtre == "texte" : texteReponse = reponse
-    if filtre == "entier" : texteReponse = int(reponse)
-    if filtre == "montant" : texteReponse = float(reponse)#decimal.Decimal(reponse)
-    if filtre == "choix" :
-        if reponse != None :
+    if filtre == "texte":
+        texteReponse = reponse
+    if filtre == "entier":
+        texteReponse = int(reponse)
+    if filtre == "montant":
+        texteReponse = float(reponse)  # decimal.Decimal(reponse)
+    if filtre == "choix":
+        if reponse is None:
             if type(reponse) == int:
-                listeTemp = [reponse,]
+                listeTemp = [reponse, ]
             else:
                 listeTemp = reponse.split(";")
             listeTemp2 = []
-            for IDchoix in listeTemp :
-                try :
+            for IDchoix in listeTemp:
+                try:
                     IDchoix = int(IDchoix)
-                    if IDchoix in self.dictChoix :
+                    if IDchoix in self.dictChoix:
                         listeTemp2.append(self.dictChoix[IDchoix])
-                except :
+                except:
                     pass
             texteReponse = ", ".join(listeTemp2)
-    if filtre == "coche" :
-        if reponse in (1, "1") :
+    if filtre == "coche":
+        if reponse in (1, "1"):
             texteReponse = _(u"Oui")
-        else :
+        else:
             texteReponse = _(u"Non")
-    if filtre == "date" : texteReponse = DateEngEnDateDD(reponse)
-    if filtre == "decimal" : texteReponse = reponse
+    if filtre == "date":
+        texteReponse = UTILS_Questionnaires.DateEngEnDateDD(reponse)
+    if filtre == "decimal":
+        texteReponse = float(reponse)
     return texteReponse
