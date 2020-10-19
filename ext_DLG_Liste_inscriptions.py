@@ -15,7 +15,7 @@ import GestionDB
 
 from ext_Extensions_automatiques import addModule, message, hasModule
 
-VERSION = "_v2.0.2"
+VERSION = "_v2.0.3"
 
 
 def Extension():
@@ -331,7 +331,7 @@ def FormatageReponse(self, reponse="", controle=""):
     if filtre == "montant":
         texteReponse = float(reponse)  # decimal.Decimal(reponse)
     if filtre == "choix":
-        if reponse is None:
+        if reponse is not None:
             if type(reponse) == int:
                 listeTemp = [reponse, ]
             else:
