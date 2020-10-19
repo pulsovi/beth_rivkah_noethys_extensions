@@ -11,7 +11,7 @@
   "Utils__init__.py":"_v2.0.0",
   "ext_CTRL_Famille_outils.py":"_v2.1.0",
   "ext_Calcul_totaux_infos_financ.py":"_v3.0.0",
-  "ext_DLG_Famille_evaluer_mensualite.py":"_v3.0.0",
+  "ext_DLG_Famille_evaluer_mensualite.py":"_v3.0.1",
   "ext_DLG_Famille_fixer_tarif.py":"_v2.0.0",
   "ext_DLG_Famille_maj_resultats_calcules.py":"_v2.0.0",
   "ext_DLG_Liste_inscriptions.py":"_v2.0.3",

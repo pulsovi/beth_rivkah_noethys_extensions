@@ -13,7 +13,7 @@ from Utils.UTILS_Traduction import _
 from ext_Extensions_automatiques import message, addModule, hasModule, deprecate
 from ext_CTRL_Famille_outils import Ajouter as AjouterOutil, UpdateQuestionnaire, CTRL_ANNEE
 
-VERSION = "_v3.0.0"
+VERSION = "_v3.0.1"
 
 
 QID = {
@@ -208,16 +208,18 @@ class Inscriptions(UpdateQuestionnaire):
         FROM
             `quotients`
             JOIN `activites` ON (
-                `activites`.`date_debut`<=`quotients`.`date_debut`
-                AND `activites`.`date_fin`>=`quotients`.`date_fin`
+                `activites`.`date_fin`>=`quotients`.`date_debut`
+                AND `activites`.`date_debut`<=`quotients`.`date_fin`
             )
         WHERE
             `activites`.`IDactivite`={IDactivite}
             AND `quotients`.`IDfamille`={IDfamille}
-        LIMIT 1
         """.format(IDfamille=IDfamille, IDactivite=IDactivite)
         response = self.GetResponse(query)
-        return response[0] if response else None
+        # if response:
+        #     if len(response) > 1:
+        #         print(u"la famille %d a plusieurs quotients pour cette annee" % IDfamille)
+        return response[-1] if response else None
 
     def ValidateList(self, nb, list):
         if len(list) != nb:
