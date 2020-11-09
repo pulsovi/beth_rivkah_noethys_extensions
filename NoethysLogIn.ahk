@@ -3,7 +3,7 @@
 
 Loop
 {
-	IfWinActive, ahk_exe Noethys.exe
+	if WinActive("ahk_exe Noethys.exe") or WinActive("ahk_exe python.exe")
 	{
 		IfWinActive, Ouverture du fichier [RESEAU]
 		{
