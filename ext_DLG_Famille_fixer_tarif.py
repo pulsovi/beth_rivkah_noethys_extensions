@@ -23,7 +23,7 @@ from ext_Extensions_automatiques import message, addModule, hasModule
 from ext_CTRL_Famille_outils import Ajouter as AjouterOutil, CTRL_ANNEE
 from ext_DLG_Famille_evaluer_mensualite import Inscriptions
 
-VERSION = "_v2.0.0"
+VERSION = "_v2.0.1"
 
 
 def Extension():
@@ -55,7 +55,7 @@ def DoLayout(self):
 def MenuFixerTarif(self, event):
     inscriptions = Inscriptions()
 
-    # recuperer la saisie utilisateur
+    # recuperer la saisie utilisateur pour l'année et le montant
     dlg = Dialog(None, db=inscriptions)
     dlg.ShowModal()
     activite = dlg.GetAnnee()
@@ -70,6 +70,15 @@ def MenuFixerTarif(self, event):
 
     brut, mensualites, coeffBR, coeffDeg, enfants = inscriptions.EvaluerMensualite(
         self.IDfamille, IDactivite)
+
+    if not brut:
+        message(
+            u"Aucun enfant de cette famille n'est inscrit à cette activité",
+            u"Opération impossible",
+            wx.OK | wx.ICON_ERROR
+        )
+        return
+
     quotient = int(round(montant / brut))
     quotientActif = GetQuotientActif(inscriptions, self.IDfamille, date_debut, date_fin)
 
