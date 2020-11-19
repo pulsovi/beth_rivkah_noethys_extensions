@@ -14,7 +14,7 @@ from ext_Extensions_automatiques import getQuery, message, printErr
 from ext_CTRL_Famille_outils import FAMILLE, INDIVIDU
 from ext_DLG_Famille_evaluer_mensualite import Inscriptions, GetActivite
 
-VERSION = "_v2.3.0"
+VERSION = "_v2.3.1"
 
 
 def Extension():
@@ -106,7 +106,9 @@ def fillCompteClient(IDfamille, db):
     code = u"" + titulaires[0]["nom"]
     for titulaire in titulaires:
         code += titulaire["prenom"]
-    code = remove_accents(code.upper()).replace(" ", "")
+    code = remove_accents(code)     # suppression des accents
+    code = code.replace(" ", "")    # suppression des espaces
+    code = code.replace("-", "")    # suppression des tirets
     indice = 0
     code10 = code[:10]
     while db.GetResponse("""
