@@ -80,6 +80,11 @@ async function main() {
     }
   });
 
+  if (isModified("Utils__init__.py") && !isModified("Utils__init__.pyc")) {
+    console.log("Utils__init__.py est modifié mais n'a pas été recompilé");
+    process.on('exit', () => process.exit(1));
+  }
+
   const stringifiedVersions = JSON.stringify(versions).slice(1, -1).split(",").sort().join(",\n  ");
   fs.writeFile("./versions.json", `{\n  ${stringifiedVersions}\n}`, "utf8", err => {
     if (err) {
