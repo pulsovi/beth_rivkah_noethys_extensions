@@ -53,14 +53,19 @@ def MajMensualiteBase():
                 IDfamille, IDactivite)
             quotient = inscriptions.GetQuotient(IDfamille, IDactivite)
             coeff = coeffBr * coeffDeg
+            # mensualité estimée avant réductions
             inscriptions.AddValue(19, IDfamille, inscriptions.CalculateTaux(brut, mensualites))
+            # mensualité estimée après réductions
             inscriptions.AddValue(30, IDfamille,
                 inscriptions.CalculateTaux(brut, mensualites, coeff))
             if quotient is not None:
+                # mensualité fixée
                 inscriptions.AddValue(20, IDfamille, round(brut * quotient[4], 2))
             for id, prenom, taux in enfants:
+                # mensualité estimée avant réductions
                 inscriptions.AddValue(25, id,
                     inscriptions.CalculateTaux(taux, mensualites), INDIVIDU)
+                # mensualité estimée après réductions
                 inscriptions.AddValue(31, id,
                     inscriptions.CalculateTaux(taux, mensualites, coeff), INDIVIDU)
             inscriptions.Execute()

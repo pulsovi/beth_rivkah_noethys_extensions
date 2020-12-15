@@ -19,7 +19,7 @@ from Utils import UTILS_Fichiers
 import FonctionsPerso
 import GestionDB
 
-VERSION = "_v1.4.2"
+VERSION = "_v1.4.3"
 BOOT = "Utils__init__"
 BOOTpy = BOOT + ".py"
 BOOTpyc = BOOT + ".pyc"
@@ -69,6 +69,7 @@ def Initialisation():
 def UpdateAll():
     updates = []
     try:
+        # update bootstrap
         officialBootstrapVersion = getOfficialVersion(BOOTpy)
         if not hasModule(BOOT + officialBootstrapVersion):
             if not hasattr(Data, "extensionsAutomatiques"):
@@ -79,8 +80,13 @@ def UpdateAll():
                         oldVersion = extension.split("_v")[1]
             updateBootstrap()
             updates.append(BOOTpy + " " + oldVersion + " > " + officialBootstrapVersion)
+
+        # update extensions
         for extension, version in officialVersionsCache.iteritems():
             if extension == BOOTpy:
+                continue
+            if version == "":
+                deleteExtension(extension)
                 continue
             currentVersion = getFileVersion(extension) or ""
             # if currentVersion is None: update
@@ -101,6 +107,12 @@ def addModule(moduleName):
     if not hasattr(Data, "extensionsAutomatiques"):
         Data.extensionsAutomatiques = []
     Data.extensionsAutomatiques.append(moduleName)
+
+
+def deleteExtension(extension):
+    filename = UTILS_Fichiers.GetRepExtensions(extension)
+    if os.path.isfile(filename):
+        os.remove(filename)
 
 
 def deprecate(text="Deprecated function"):

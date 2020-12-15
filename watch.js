@@ -67,7 +67,7 @@ function handleChange(file) {
     "DLG_Famille_maj_resultats_calcules.py",
     "DLG_Liste_inscriptions.py",
     "Extensions_automatiques.py",
-    "Mensualite_base.py",
+    "Preparer_Export.py",
     "Tests.py",
   ];
   const toIgnore = [

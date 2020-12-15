@@ -11,8 +11,12 @@ const extensions = [
   "DLG_Famille_maj_resultats_calcules.py",
   "DLG_Liste_inscriptions.py",
   "Extensions_automatiques.py",
-  "Mensualite_base.py",
+  "Preparer_Export.py",
   "Utils__init__.py",
+];
+
+const deleted = [
+  "Mensualite_base.py",
 ];
 
 const commit_content = child_process.execSync("git status --porcelain").toString().split("\n");
@@ -84,6 +88,8 @@ async function main() {
     console.log("Utils__init__.py est modifié mais n'a pas été recompilé");
     process.on('exit', () => process.exit(1));
   }
+
+  deleted.forEach(filename => versions[filename] = "");
 
   const stringifiedVersions = JSON.stringify(versions).slice(1, -1).split(",").sort().join(",\n  ");
   fs.writeFile("./versions.json", `{\n  ${stringifiedVersions}\n}`, "utf8", err => {
