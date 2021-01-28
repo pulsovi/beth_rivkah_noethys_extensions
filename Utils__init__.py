@@ -8,7 +8,7 @@ import wx
 import Data
 import traceback
 
-VERSION = "_v2.0.1"
+VERSION = "_v2.0.2"
 
 ext = "py"
 mainFile = "ext_Extensions_automatiques.py"
@@ -23,7 +23,10 @@ sys.path.append(UTILS_Fichiers.GetRepExtensions())
 
 def getFileList():
     """Récupére la liste des fichiers d'extensions"""
-    fichiers = os.listdir(UTILS_Fichiers.GetRepExtensions())
+    dossierExtensions = UTILS_Fichiers.GetRepExtensions()
+    if not os.path.isdir(dossierExtensions):
+        return ()
+    fichiers = os.listdir(dossierExtensions)
     fichiers.sort()
     return fichiers
 
