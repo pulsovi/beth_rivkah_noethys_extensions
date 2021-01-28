@@ -19,7 +19,7 @@ from Utils import UTILS_Fichiers
 import FonctionsPerso
 import GestionDB
 
-VERSION = "_v2.0.1"
+VERSION = "_v2.0.2"
 BOOT = "Utils__init__"
 BOOTpy = BOOT + ".py"
 BOOTpyc = BOOT + ".pyc"
@@ -160,12 +160,13 @@ def getFromGithub(
         fd.close()
         return content
     except Exception as err:
-        if str(type(err)) == "<class 'urllib2.HTTPError'>":
+        if str(type(err)) == "<class 'urllib2.HTTPError'>" or \
+           str(type(err)) == "<class 'urlopen'>":
             return None
         traceback.print_exc(file=sys.stderr)
         sys.stderr.write("\n")
         sys.stderr.flush()
-        message(str(err))
+        message(str(err) + '\n' + str(type(err)))
         return None
 
 
