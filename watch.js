@@ -83,6 +83,7 @@ function handleChange(file) {
     "inscription nouvelle annee.sql",
     "maj_versions.js",
     "node_modules",
+    ".goutputstream-*",
     "questions.csv",
     "reset extensions auto.sh",
     "TODOS.txt",
