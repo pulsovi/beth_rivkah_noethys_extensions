@@ -8,7 +8,17 @@ import wx
 import Data
 import traceback
 
-VERSION = "_v2.0.0"
+VERSION = "_v2.0.1"
+
+ext = "py"
+mainFile = "ext_Extensions_automatiques.py"
+listeErreurs = {}
+
+
+# Ajouter la version du bootstrap dans le repertoire des extensions chargées
+Data.extensionsAutomatiques = ["Utils__init__" + VERSION]
+# Ajouter le repertoire des extensions au PATH
+sys.path.append(UTILS_Fichiers.GetRepExtensions())
 
 
 def getFileList():
@@ -38,15 +48,6 @@ def launch(fichier):
         traceback.print_exc(file=sys.stderr)
         sys.stderr.write("\n")
 
-
-# Ajouter la version du bootstrap dans le repertoire des extensions chargées
-Data.extensionsAutomatiques = ["Utils__init__" + VERSION]
-# Ajouter le repertoire des extensions au PATH
-sys.path.append(UTILS_Fichiers.GetRepExtensions())
-
-ext = "py"
-mainFile = "ext_Extensions_automatiques.py"
-listeErreurs = {}
 
 fichiers = getFileList()
 if mainFile in fichiers:
