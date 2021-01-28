@@ -1,3 +1,5 @@
 TODOS.txt
 /node_modules
 config.json
+!Utils__init__.pyc
+*.pyc
